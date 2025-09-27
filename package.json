@@ -2,8 +2,11 @@
   "name": "mad_project",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
+    "start": "concurrently \"cd backend && npm run dev\" \"cd frontend && npx expo start\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npx expo start",
+    "setup": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +22,10 @@
   },
   "homepage": "https://github.com/shivank-1011/mad_project_idea#readme",
   "dependencies": {
-    "dotenv": "^17.2.2"
+    "dotenv": "^17.2.2",
+    "expo": "^54.0.10"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
