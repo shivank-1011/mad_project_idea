@@ -1,14 +1,357 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 
 async function main() {
-    await prisma.product.createMany({
-        data: [
-            { name: "iPhone 15", brand: "Apple", specs: { ram: "6GB", storage: "128GB" }, price: 79999, rating: 4.8, imageUrl: "", affiliateLink: "https://amzn.to/3example1" },
-            { name: "Galaxy S24", brand: "Samsung", specs: { ram: "8GB", storage: "256GB" }, price: 69999, rating: 4.7, imageUrl: "", affiliateLink: "https://amzn.to/3example2" }
-        ]
-    });
+  await prisma.product.createMany({
+    data: [
+      // Samsung Galaxy Phones
+      {
+        name: "Samsung Galaxy S25 Ultra",
+        brand: "Samsung",
+        specs: {
+          processor: "Snapdragon 8 Gen 3",
+          ram: "12GB",
+          storage: "512GB",
+          display: "6.8 inch Dynamic AMOLED 2X",
+          camera: "200MP + 50MP + 10MP + 12MP",
+          frontCamera: "12MP",
+          battery: "5000mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 123499,
+        rating: 4.8,
+        imageUrl:
+          "/assets/galaxy-a06-sm-a065flbdins-samsung-original-imah4az6d6xfjqqz.png",
+        affiliateLink: "https://www.flipkart.com/samsung-galaxy-s25-ultra",
+      },
+      {
+        name: "Samsung Galaxy Z Fold 6",
+        brand: "Samsung",
+        specs: {
+          processor: "Snapdragon 8 Gen 3",
+          ram: "12GB",
+          storage: "256GB",
+          display: "7.6 inch Foldable Dynamic AMOLED 2X",
+          camera: "50MP + 12MP + 10MP",
+          frontCamera: "10MP + 4MP",
+          battery: "4400mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 109785,
+        rating: 4.7,
+        imageUrl:
+          "/assets/in-galaxy-f-sm-e066bzvhins-sm-e---bzvgins-545132358.png",
+        affiliateLink: "https://www.amazon.in/samsung-galaxy-z-fold6",
+      },
+
+      // Apple iPhone Models
+      {
+        name: "iPhone 15 Pro Max",
+        brand: "Apple",
+        specs: {
+          processor: "A17 Pro Bionic",
+          ram: "8GB",
+          storage: "256GB",
+          display: "6.7 inch Super Retina XDR OLED",
+          camera: "48MP + 12MP + 12MP",
+          frontCamera: "12MP",
+          battery: "4422mAh",
+          os: "iOS 17",
+          network: "5G",
+        },
+        price: 134900,
+        rating: 4.9,
+        imageUrl:
+          "/assets/iphone-15-pro-max-256-gb-natural-titanium-272607387-rul0ytcs.png",
+        affiliateLink: "https://www.amazon.in/apple-iphone-15-pro-max",
+      },
+      {
+        name: "iPhone 16",
+        brand: "Apple",
+        specs: {
+          processor: "A18 Bionic",
+          ram: "8GB",
+          storage: "128GB",
+          display: "6.1 inch Super Retina XDR OLED",
+          camera: "48MP + 12MP",
+          frontCamera: "12MP",
+          battery: "3561mAh",
+          os: "iOS 18",
+          network: "5G",
+        },
+        price: 79900,
+        rating: 4.8,
+        imageUrl: "/assets/Apple-iPhone-16-hero-240909_inline.jpg.large.png",
+        affiliateLink: "https://www.flipkart.com/apple-iphone-16",
+      },
+      {
+        name: "iPhone 16 Plus",
+        brand: "Apple",
+        specs: {
+          processor: "A18 Bionic",
+          ram: "8GB",
+          storage: "128GB",
+          display: "6.7 inch Super Retina XDR OLED",
+          camera: "48MP + 12MP",
+          frontCamera: "12MP",
+          battery: "4674mAh",
+          os: "iOS 18",
+          network: "5G",
+        },
+        price: 89900,
+        rating: 4.8,
+        imageUrl: "/assets/Apple-iPhone-16-hero-240909_inline.jpg.large.png",
+        affiliateLink: "https://www.amazon.in/apple-iphone-16-plus",
+      },
+      {
+        name: "iPhone 16 Pro",
+        brand: "Apple",
+        specs: {
+          processor: "A18 Pro Bionic",
+          ram: "8GB",
+          storage: "128GB",
+          display: "6.3 inch Super Retina XDR OLED",
+          camera: "48MP + 48MP + 12MP",
+          frontCamera: "12MP",
+          battery: "3582mAh",
+          os: "iOS 18",
+          network: "5G",
+        },
+        price: 119900,
+        rating: 4.9,
+        imageUrl:
+          "/assets/apple-iphone-16-pro-max-1tb-black-titanium-myx43.png",
+        affiliateLink: "https://www.flipkart.com/apple-iphone-16-pro",
+      },
+      {
+        name: "iPhone 16 Pro Max",
+        brand: "Apple",
+        specs: {
+          processor: "A18 Pro Bionic",
+          ram: "8GB",
+          storage: "256GB",
+          display: "6.9 inch Super Retina XDR OLED",
+          camera: "48MP + 48MP + 12MP",
+          frontCamera: "12MP",
+          battery: "4685mAh",
+          os: "iOS 18",
+          network: "5G",
+        },
+        price: 144900,
+        rating: 4.9,
+        imageUrl:
+          "/assets/apple-iphone-16-pro-max-1tb-black-titanium-myx43.png",
+        affiliateLink: "https://www.amazon.in/apple-iphone-16-pro-max",
+      },
+      {
+        name: "iPhone 13 Pro",
+        brand: "Apple",
+        specs: {
+          processor: "A15 Bionic",
+          ram: "6GB",
+          storage: "256GB",
+          display: "6.1 inch Super Retina XDR OLED",
+          camera: "12MP + 12MP + 12MP",
+          frontCamera: "12MP",
+          battery: "3095mAh",
+          os: "iOS 15",
+          network: "5G",
+        },
+        price: 89900,
+        rating: 4.7,
+        imageUrl:
+          "/assets/iphone-13-pro-256-gb-alpine-green-270849872-z3ndckg1.png",
+        affiliateLink: "https://www.flipkart.com/apple-iphone-13-pro",
+      },
+      {
+        name: "iPhone 14 Pro Max",
+        brand: "Apple",
+        specs: {
+          processor: "A16 Bionic",
+          ram: "6GB",
+          storage: "128GB",
+          display: "6.7 inch Super Retina XDR OLED",
+          camera: "48MP + 12MP + 12MP",
+          frontCamera: "12MP",
+          battery: "4323mAh",
+          os: "iOS 16",
+          network: "5G",
+        },
+        price: 139900,
+        rating: 4.8,
+        imageUrl:
+          "/assets/Apple-iPhone-14-Pro-iPhone-14-Pro-Max-deep-purple-220907-geo_inline.jpg.large.png",
+        affiliateLink: "https://www.amazon.in/apple-iphone-14-pro-max",
+      },
+
+      // Vivo Phones
+      {
+        name: "Vivo X200 Pro",
+        brand: "Vivo",
+        specs: {
+          processor: "MediaTek Dimensity 9400",
+          ram: "16GB",
+          storage: "512GB",
+          display: "6.78 inch LTPO AMOLED",
+          camera: "50MP + 50MP + 200MP",
+          frontCamera: "32MP",
+          battery: "6000mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 94999,
+        rating: 4.7,
+        imageUrl:
+          "/assets/Vivo-x200-pro-5g-titanium-grey-512gb-16gb-ram-Front-Back-View-Image.jpg",
+        affiliateLink: "https://www.flipkart.com/vivo-x200-pro-5g",
+      },
+      {
+        name: "Vivo X100 Pro",
+        brand: "Vivo",
+        specs: {
+          processor: "MediaTek Dimensity 9300",
+          ram: "16GB",
+          storage: "512GB",
+          display: "6.78 inch AMOLED",
+          camera: "50MP + 50MP + 50MP",
+          frontCamera: "32MP",
+          battery: "5400mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 89899,
+        rating: 4.7,
+        imageUrl: "/assets/product_1.png",
+        affiliateLink: "https://www.flipkart.com/vivo-x100-pro",
+      },
+      {
+        name: "Vivo V30 Pro",
+        brand: "Vivo",
+        specs: {
+          processor: "MediaTek Dimensity 8200",
+          ram: "12GB",
+          storage: "512GB",
+          display: "6.78 inch AMOLED",
+          camera: "50MP + 50MP + 50MP",
+          frontCamera: "50MP",
+          battery: "5000mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 33800,
+        rating: 4.5,
+        imageUrl: "/assets/v30-5g-v2318-vivo-original-imagyzhhxumayhzw.png",
+        affiliateLink: "https://www.flipkart.com/vivo-v30-pro-5g",
+      },
+      {
+        name: "Vivo V30",
+        brand: "Vivo",
+        specs: {
+          processor: "Snapdragon 7 Gen 3",
+          ram: "8GB",
+          storage: "256GB",
+          display: "6.78 inch AMOLED",
+          camera: "50MP + 50MP",
+          frontCamera: "50MP",
+          battery: "5000mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 28999,
+        rating: 4.4,
+        imageUrl: "/assets/v30-5g-v2318-vivo-original-imagyzhhxumayhzw.png",
+        affiliateLink: "https://www.amazon.in/vivo-v30-5g",
+      },
+      {
+        name: "Vivo V40 Pro",
+        brand: "Vivo",
+        specs: {
+          processor: "MediaTek Dimensity 9200+",
+          ram: "12GB",
+          storage: "256GB",
+          display: "6.78 inch AMOLED",
+          camera: "50MP + 50MP",
+          frontCamera: "50MP",
+          battery: "5500mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 49999,
+        rating: 4.6,
+        imageUrl: "/assets/product_2.png",
+        affiliateLink: "https://www.flipkart.com/vivo-v40-pro",
+      },
+      {
+        name: "Vivo V40",
+        brand: "Vivo",
+        specs: {
+          processor: "Snapdragon 7 Gen 3",
+          ram: "8GB",
+          storage: "128GB",
+          display: "6.78 inch AMOLED",
+          camera: "50MP + 50MP",
+          frontCamera: "50MP",
+          battery: "5500mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 34999,
+        rating: 4.5,
+        imageUrl: "/assets/product_3.png",
+        affiliateLink: "https://www.amazon.in/vivo-v40",
+      },
+      {
+        name: "Vivo T3 Pro",
+        brand: "Vivo",
+        specs: {
+          processor: "Snapdragon 7 Gen 3",
+          ram: "8GB",
+          storage: "256GB",
+          display: "6.77 inch AMOLED",
+          camera: "50MP + 8MP",
+          frontCamera: "16MP",
+          battery: "5500mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 24999,
+        rating: 4.3,
+        imageUrl: "/assets/product_4.png",
+        affiliateLink: "https://www.flipkart.com/vivo-t3-pro",
+      },
+      {
+        name: "Vivo T3",
+        brand: "Vivo",
+        specs: {
+          processor: "MediaTek Dimensity 7200",
+          ram: "8GB",
+          storage: "128GB",
+          display: "6.67 inch AMOLED",
+          camera: "50MP + 2MP",
+          frontCamera: "16MP",
+          battery: "5000mAh",
+          os: "Android 14",
+          network: "5G",
+        },
+        price: 19999,
+        rating: 4.2,
+        imageUrl: "/assets/images.png",
+        affiliateLink: "https://www.amazon.in/vivo-t3",
+      },
+    ],
+  });
+
+  console.log(
+    "Database seeded successfully with real pricing and specifications!"
+  );
 }
 
-main().catch(e => console.error(e)).finally(() => prisma.$disconnect());
-
+main()
+  .catch((e) => {
+    console.error("Error seeding database:", e);
+  })
+  .finally(() => {
+    prisma.$disconnect();
+  });
