@@ -1,12 +1,13 @@
 import axios from "axios";
-const API_URL = "http://localhost:3001/api/products";
+import { API_PRODUCTS_URL } from "../config/api";
+const URL = API_PRODUCTS_URL;
 
 export const getProducts = async (filters = {}) => {
-  const response = await axios.get(API_URL, { params: filters });
-  return response.data;
+  const result = await axios.get(URL, { params: filters });
+  return result.data;
 };
 
 export const getProductById = async (id) => {
-  const response = await axios.get(`${API_URL}/${id}`);
-  return response.data;
+  const result = await axios.get(`${URL}/${id}`);
+  return result.data;
 };

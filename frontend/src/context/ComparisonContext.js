@@ -11,30 +11,27 @@ export const useComparison = () => {
 };
 
 export const ComparisonProvider = ({ children }) => {
-  const [comparisonList, setComparisonList] = useState([]);
+  const [list, setList] = useState([]);
 
-  const addToComparison = (product) => {
-    if (
-      comparisonList.length < 5 &&
-      !comparisonList.find((p) => p.id === product.id)
-    ) {
-      setComparisonList([...comparisonList, product]);
+  const addItem = (item) => {
+    if (list.length < 5 && !list.find((p) => p.id === item.id)) {
+      setList([...list, item]);
     }
   };
 
-  const removeFromComparison = (productId) => {
-    setComparisonList(comparisonList.filter((p) => p.id !== productId));
+  const removeItem = (id) => {
+    setList(list.filter((p) => p.id !== id));
   };
 
-  const clearComparison = () => {
-    setComparisonList([]);
+  const clear = () => {
+    setList([]);
   };
 
   const value = {
-    comparisonList,
-    addToComparison,
-    removeFromComparison,
-    clearComparison,
+    comparisonList: list,
+    addToComparison: addItem,
+    removeFromComparison: removeItem,
+    clearComparison: clear,
   };
 
   return (

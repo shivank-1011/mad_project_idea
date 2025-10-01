@@ -1,8 +1,10 @@
-import axios from 'axios';
-const AI_URL = 'http://localhost:5000/api/ai';
+import axios from "axios";
+import { AI_API_URL } from "../config/api";
+const URL = AI_API_URL;
 
-export const getAIRecommendation = async (preferences) => {
-    const response = await axios.post(`${AI_URL}/recommendation`, { userPreferences: preferences });
-    return response.data.recommendation;
+export const getAIRecommendation = async (prefs) => {
+  const result = await axios.post(`${URL}/recommendation`, {
+    userPreferences: prefs,
+  });
+  return result.data.recommendation;
 };
-

@@ -2,117 +2,308 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Button,
+  Image,
   ActivityIndicator,
   ScrollView,
   StyleSheet,
   Alert,
   Linking,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getProductById } from "../api/productApi";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { useComparison } from "../context/ComparisonContext";
+import { API_BASE_URL } from "../config/api";
+import { CustomButton } from "../components/CustomButton";
+import { commonStyles } from "../styles/commonStyles";
+import {
+  colors,
+  spacing,
+  borderRadius,
+  shadows,
+  typography,
+} from "../styles/theme";
 
-const screenWidth = Dimensions.get("window").width;
+const width = Dimensions.get("window").width;
 
 export default function ProductDetailScreen({ route }) {
   const { productId } = route.params;
-  const [product, setProduct] = useState(null);
+  const [item, setItem] = useState(null);
   const { addToComparison } = useComparison();
 
-  useEffect(() => {
-    async function fetchProduct() {
-      const data = await getProductById(productId);
-      setProduct(data);
+  // Construct full image URL if it's a relative path or handle external URLs
+  const getImageUrl = (imageUrl) => {
+    if (imageUrl && imageUrl.startsWith("/assets/")) {
+      return `${API_BASE_URL}${imageUrl}`;
     }
-    fetchProduct();
+    return imageUrl; // Return as-is for external URLs (https://)
+  };
+
+  useEffect(() => {
+    async function loadItem() {
+      const data = await getProductById(productId);
+      setItem(data);
+    }
+    loadItem();
   }, [productId]);
 
-  const handleAddToComparison = () => {
-    addToComparison(product);
+  const addToCompare = () => {
+    addToComparison(item);
     Alert.alert(
       "Added to Comparison",
       "Go to Comparison screen to view products."
     );
   };
 
-  const renderPriceGraph = (priceHistory) => {
-    if (!priceHistory || priceHistory.length === 0) return null;
-    const labels = priceHistory.map((p) =>
-      new Date(p.date).toLocaleDateString()
-    );
-    const data = priceHistory.map((p) => p.price);
+  const showChart = (history) => {
+    if (!history || history.length === 0) return null;
+    const dates = history.map((p) => new Date(p.date).toLocaleDateString());
+    const prices = history.map((p) => p.price);
 
     return (
       <LineChart
-        data={{ labels, datasets: [{ data }] }}
-        width={screenWidth - 40}
+        data={{ labels: dates, datasets: [{ data: prices }] }}
+        width={width - spacing.lg * 2}
         height={200}
         yAxisLabel="₹"
         chartConfig={{
-          backgroundColor: "#fff",
-          backgroundGradientFrom: "#fff",
-          backgroundGradientTo: "#fff",
+          backgroundColor: colors.surface,
+          backgroundGradientFrom: colors.surface,
+          backgroundGradientTo: colors.surface,
           decimalPlaces: 0,
-          color: (opacity = 1) => `rgba(0,0,255,${opacity})`,
-          labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-          style: { borderRadius: 16 },
-          propsForDots: { r: "4", strokeWidth: "1", stroke: "#0000ff" },
+          color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+          labelColor: (opacity = 1) => colors.text,
+          style: { borderRadius: borderRadius.lg },
+          propsForDots: { r: "4", strokeWidth: "2", stroke: colors.primary },
         }}
-        style={{ marginVertical: 10, borderRadius: 16 }}
+        style={styles.chart}
       />
     );
   };
 
-  if (!product)
-    return <ActivityIndicator size="large" style={{ marginTop: 20 }} />;
+  if (!item)
+    return (
+      <SafeAreaView style={commonStyles.container}>
+        <View style={commonStyles.columnCenter}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[commonStyles.bodyMedium, { marginTop: spacing.sm }]}>
+            Loading product details...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+
+  // Generate star rating display
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push("★");
+    }
+    if (hasHalfStar) {
+      stars.push("☆");
+    }
+    while (stars.length < 5) {
+      stars.push("☆");
+    }
+
+    return stars.join("");
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.name}>{product.name}</Text>
-      <Text style={styles.brand}>Brand: {product.brand}</Text>
-      <Text style={styles.price}>Price: ₹{product.price}</Text>
-      <Text style={styles.rating}>Rating: {product.rating}</Text>
+    <SafeAreaView style={commonStyles.container}>
+      <ScrollView
+        style={styles.main}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: getImageUrl(item.imageUrl) }}
+            style={styles.productImage}
+          />
+        </View>
 
-      <Text style={styles.sectionHeader}>Specifications:</Text>
-      {product.specs &&
-        Object.keys(product.specs).map((key) => (
-          <Text key={key} style={styles.spec}>
-            {key}: {product.specs[key]}
-          </Text>
-        ))}
+        <View style={styles.contentContainer}>
+          <View style={styles.headerSection}>
+            <Text style={styles.title}>{item.name}</Text>
+            <Text style={styles.brand}>{item.brand}</Text>
 
-      <Text style={styles.sectionHeader}>Price History:</Text>
-      {renderPriceGraph(product.priceHistory)}
+            <View style={styles.priceRatingContainer}>
+              <Text style={styles.price}>₹{item.price.toLocaleString()}</Text>
+              <View style={styles.ratingContainer}>
+                <Text style={styles.stars}>{renderStars(item.rating)}</Text>
+                <Text style={styles.ratingText}>{item.rating}/5</Text>
+              </View>
+            </View>
+          </View>
+
+          {item.specs && Object.keys(item.specs).length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Specifications</Text>
+              <View style={styles.specsContainer}>
+                {Object.keys(item.specs).map((key) => (
+                  <View key={key} style={styles.specRow}>
+                    <Text style={styles.specKey}>{key}:</Text>
+                    <Text style={styles.specValue}>{item.specs[key]}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Price History</Text>
+            <View style={styles.chartContainer}>
+              {showChart(item.priceHistory)}
+            </View>
+          </View>
+        </View>
+      </ScrollView>
 
       <View style={styles.buttonContainer}>
-        <Button
+        <CustomButton
           title="Buy Now"
-          onPress={() => Linking.openURL(product.affiliateLink)}
+          onPress={() => Linking.openURL(item.affiliateLink)}
+          style={styles.buyButton}
         />
-        <Button title="Add to Comparison" onPress={handleAddToComparison} />
+        <CustomButton
+          title="Add to Comparison"
+          onPress={addToCompare}
+          variant="secondary"
+          style={styles.compareButton}
+        />
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  name: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
-  brand: { fontSize: 16, marginBottom: 5 },
-  price: { fontSize: 16, marginBottom: 5, color: "green" },
-  rating: { fontSize: 16, marginBottom: 10 },
-  sectionHeader: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 15,
-    marginBottom: 5,
+  main: {
+    flex: 1,
   },
-  spec: { fontSize: 14, marginBottom: 3 },
-  buttonContainer: {
+  scrollContent: {
+    paddingBottom: 100, // Space for fixed buttons
+  },
+  imageContainer: {
+    backgroundColor: colors.surfaceSecondary,
+    padding: spacing.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  productImage: {
+    width: width - spacing.lg * 2,
+    height: 300,
+    resizeMode: "contain",
+  },
+  contentContainer: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+  headerSection: {
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  title: {
+    fontSize: typography.fontSize.xxl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+    marginBottom: spacing.xs,
+    lineHeight: typography.fontSize.xxl * typography.lineHeight.tight,
+  },
+  brand: {
+    fontSize: typography.fontSize.lg,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+    fontWeight: typography.fontWeight.medium,
+  },
+  priceRatingContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    alignItems: "center",
+  },
+  price: {
+    fontSize: typography.fontSize.xxxl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.success,
+  },
+  ratingContainer: {
+    alignItems: "flex-end",
+  },
+  stars: {
+    fontSize: typography.fontSize.lg,
+    color: colors.secondary,
+    marginBottom: spacing.xs,
+  },
+  ratingText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  section: {
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  sectionTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text,
+    marginBottom: spacing.md,
+  },
+  specsContainer: {
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+  },
+  specRow: {
+    flexDirection: "row",
+    paddingVertical: spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+  },
+  specKey: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.textSecondary,
+  },
+  specValue: {
+    flex: 2,
+    fontSize: typography.fontSize.sm,
+    color: colors.text,
+  },
+  chartContainer: {
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    alignItems: "center",
+  },
+  chart: {
+    borderRadius: borderRadius.md,
+  },
+  buttonContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    flexDirection: "row",
+    gap: spacing.md,
+    ...shadows.lg,
+  },
+  buyButton: {
+    flex: 1,
+  },
+  compareButton: {
+    flex: 1,
   },
 });

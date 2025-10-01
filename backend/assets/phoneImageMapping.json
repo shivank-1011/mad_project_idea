@@ -1,0 +1,47 @@
+{
+  "Samsung Galaxy S25 Ultra": "https://images.samsung.com/is/image/samsung/p6pim/in/2401/gallery/in-galaxy-s24-ultra-s928-sm-s928bztqins-thumb-539573190",
+  "Samsung Galaxy Z Fold 6": "https://images.samsung.com/is/image/samsung/p6pim/in/2407/gallery/in-galaxy-z-fold6-f956-sm-f956bzkainu-thumb-542382265",
+  "Samsung Galaxy S24 Ultra": "https://images.samsung.com/is/image/samsung/p6pim/in/2401/gallery/in-galaxy-s24-ultra-s928-sm-s928bztuins-thumb-539573163",
+  "Samsung Galaxy S24+": "https://images.samsung.com/is/image/samsung/p6pim/in/2401/gallery/in-galaxy-s24-plus-s926-sm-s926bzvcins-thumb-539566424",
+  "Samsung Galaxy A55 5G": "https://images.samsung.com/is/image/samsung/p6pim/in/2403/gallery/in-galaxy-a55-5g-a556-sm-a556elvcins-thumb-540776381",
+  "Samsung Galaxy A35 5G": "https://images.samsung.com/is/image/samsung/p6pim/in/2403/gallery/in-galaxy-a35-5g-a356-sm-a356elbvins-thumb-540776316",
+  "Samsung Galaxy Z Flip 6": "https://images.samsung.com/is/image/samsung/p6pim/in/2407/gallery/in-galaxy-z-flip6-f741-sm-f741blbainu-thumb-542382088",
+  "Samsung Galaxy A06": "https://images.samsung.com/is/image/samsung/p6pim/in/2409/gallery/in-galaxy-a06-a065-sm-a065flbdins-thumb-543185430",
+
+  "iPhone 15 Pro Max": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-max-naturaltitanium-select?wid=470&hei=556&fmt=png-alpha&.v=1692895635893",
+  "iPhone 16": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-ultramarine-select?wid=470&hei=556&fmt=png-alpha&.v=1723752527114",
+  "iPhone 16 Plus": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-plus-ultramarine-select?wid=470&hei=556&fmt=png-alpha&.v=1723752527105",
+  "iPhone 16 Pro": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-blacktitanium-select?wid=470&hei=556&fmt=png-alpha&.v=1723752775462",
+  "iPhone 16 Pro Max": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-max-blacktitanium-select?wid=470&hei=556&fmt=png-alpha&.v=1723752775462",
+  "iPhone 13 Pro": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pro-alpinegreen-select?wid=470&hei=556&fmt=png-alpha&.v=1645572315986",
+  "iPhone 14 Pro Max": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-max-deeppurple-select?wid=470&hei=556&fmt=png-alpha&.v=1660753056146",
+  "iPhone 15": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pink-select?wid=470&hei=556&fmt=png-alpha&.v=1692895624552",
+  "iPhone 15 Plus": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-plus-pink-select?wid=470&hei=556&fmt=png-alpha&.v=1692895624626",
+  "iPhone 15 Pro": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-naturaltitanium-select?wid=470&hei=556&fmt=png-alpha&.v=1692895635893",
+  "iPhone 14": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-purple-select?wid=470&hei=556&fmt=png-alpha&.v=1661027788150",
+  "iPhone 14 Plus": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-plus-purple-select?wid=470&hei=556&fmt=png-alpha&.v=1661027788150",
+  "iPhone 13": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-pink-select-2021?wid=470&hei=556&fmt=png-alpha&.v=1629842709000",
+
+  "Nothing Phone (2)": "https://assets.nothing.tech/catalog/product/cache/1/image/1600x/17f82f742ffe127f42dca9de82fb58b1/p/h/phone-2-white_3.png",
+  "Nothing Phone (2a)": "https://assets.nothing.tech/catalog/product/cache/1/image/1600x/17f82f742ffe127f42dca9de82fb58b1/p/h/phone-2a-white_1.png",
+  "Nothing Phone (1)": "https://assets.nothing.tech/catalog/product/cache/1/image/1600x/17f82f742ffe127f42dca9de82fb58b1/p/h/phone-1-white_2.png",
+
+  "OnePlus 12": "https://oasis.opstatics.com/content/dam/oasis/page/2023/global/product/oneplus-12/images/kv/12-5g-green_kv.png",
+  "OnePlus 11 5G": "https://oasis.opstatics.com/content/dam/oasis/page/2023/global/product/oneplus-11/images/kv/11-5g-black_kv.png",
+  "OnePlus Nord CE 4": "https://oasis.opstatics.com/content/dam/oasis/page/2024/global/product/nord-ce4/images/kv/nord-ce4-celadon-marble_kv.png",
+  "OnePlus 12R": "https://oasis.opstatics.com/content/dam/oasis/page/2024/global/product/oneplus-12r/images/kv/12r-5g-blue_kv.png",
+  "OnePlus Nord 3 5G": "https://oasis.opstatics.com/content/dam/oasis/page/2023/global/product/nord-3/images/kv/nord-3-5g-green_kv.png",
+
+  "Vivo X200 Pro": "https://www.vivo.com/content/dam/vivo/global/product/x200-pro/gallery/X200-Pro-Titanium-Gray_1.png",
+  "Vivo X100 Pro": "https://www.vivo.com/content/dam/vivo/in/product/x100-pro/gallery/X100-Pro-Asteroid-Black_1.png",
+  "Vivo V30 Pro": "https://www.vivo.com/content/dam/vivo/in/product/v30-pro/gallery/V30-Pro-Andaman-Blue_1.png",
+  "Vivo V30": "https://www.vivo.com/content/dam/vivo/in/product/v30/gallery/V30-Andaman-Blue_1.png",
+  "Vivo V40 Pro": "https://www.vivo.com/content/dam/vivo/in/product/v40-pro/gallery/V40-Pro-Ganges-Blue_1.png",
+  "Vivo V40": "https://www.vivo.com/content/dam/vivo/in/product/v40/gallery/V40-Ganges-Blue_1.png",
+  "Vivo T3 Pro": "https://www.vivo.com/content/dam/vivo/in/product/t3-pro/gallery/T3-Pro-Sandstone-Orange_1.png",
+  "Vivo T3": "https://www.vivo.com/content/dam/vivo/in/product/t3/gallery/T3-Crystal-Flake_1.png",
+
+  "Xiaomi 14": "https://i01.appmifile.com/v1/MI_18455B3E4DA706226CF7535A58E875F0267/pms_1704787456.44907933.png",
+  "Realme GT 6": "https://image01.realme.net/general/20240620/1718874126694784c23a5374b4e1595565a096ab909e2.png.webp",
+  "Oppo Reno 12 Pro": "https://image.oppo.com/content/dam/oppo/product-asset-library/smartphone/reno12-pro-5g/overview/reno12-pro-5g-sunset-gold-front-back.png"
+}

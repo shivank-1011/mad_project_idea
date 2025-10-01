@@ -1,184 +1,281 @@
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   FlatList,
   ActivityIndicator,
   TextInput,
   StyleSheet,
-  ScrollView,
+  Text,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import ProductCard from "../components/ProductCard";
 import { getProducts } from "../api/productApi";
 import { Picker } from "@react-native-picker/picker";
 import { LineChart } from "react-native-chart-kit";
-import { Dimensions } from "react-native";
+import { commonStyles } from "../styles/commonStyles";
+import {
+  colors,
+  spacing,
+  borderRadius,
+  shadows,
+  typography,
+} from "../styles/theme";
 
-const screenWidth = Dimensions.get("window").width;
+const width = Dimensions.get("window").width;
 
 const ProductListScreen = ({ navigation }) => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Separate states for typing vs. actual search trigger
-  const [searchQuery, setSearchQuery] = useState("");
-  const [search, setSearch] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [sortOption, setSortOption] = useState("");
+  const [typing, setTyping] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [brand, setBrand] = useState("");
+  const [sortBy, setSortBy] = useState("");
 
-  const timeoutRef = useRef(null);
+  const timer = useRef(null);
 
-  const fetchProducts = useCallback(async (searchTerm, brand, sort) => {
-    setLoading(true);
+  const loadItems = useCallback(async (search, brandName, sorting) => {
+    setIsLoading(true);
     try {
       const filters = {};
-      if (searchTerm) filters.name = searchTerm;
-      if (brand) filters.brand = brand;
+      if (search) filters.name = search;
+      if (brandName) filters.brand = brandName;
 
       let data = await getProducts(filters);
-      if (sort === "priceAsc") data.sort((a, b) => a.price - b.price);
-      else if (sort === "priceDesc") data.sort((a, b) => b.price - a.price);
-      else if (sort === "ratingDesc") data.sort((a, b) => b.rating - a.rating);
+      if (sorting === "priceAsc") data.sort((a, b) => a.price - b.price);
+      else if (sorting === "priceDesc") data.sort((a, b) => b.price - a.price);
+      else if (sorting === "ratingDesc")
+        data.sort((a, b) => b.rating - a.rating);
 
-      setProducts(data);
+      setItems(data);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
-  // Initial load
   useEffect(() => {
-    fetchProducts("", "", "");
-  }, [fetchProducts]);
+    loadItems("", "", "");
+  }, [loadItems]);
 
-  // Debounce search typing
   useEffect(() => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setSearch(searchQuery); // trigger real search
-    }, 1500); // 800ms debounce
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      setSearchText(typing);
+    }, 1500);
 
-    return () => clearTimeout(timeoutRef.current);
-  }, [searchQuery]);
+    return () => clearTimeout(timer.current);
+  }, [typing]);
 
-  // Refetch when search, brand, or sort changes
   useEffect(() => {
-    fetchProducts(search, brandFilter, sortOption);
-  }, [search, brandFilter, sortOption, fetchProducts]);
+    loadItems(searchText, brand, sortBy);
+  }, [searchText, brand, sortBy, loadItems]);
 
-  const renderPriceGraph = useCallback((priceHistory) => {
-    if (!priceHistory || priceHistory.length === 0) return null;
-    const labels = priceHistory.map((p) =>
-      new Date(p.date).toLocaleDateString()
-    );
-    const data = priceHistory.map((p) => p.price);
+  const showChart = useCallback((history) => {
+    if (!history || history.length === 0) return null;
+    const dates = history.map((p) => new Date(p.date).toLocaleDateString());
+    const prices = history.map((p) => p.price);
 
     return (
-      <LineChart
-        data={{ labels, datasets: [{ data }] }}
-        width={screenWidth - 40}
-        height={200}
-        yAxisLabel="₹"
-        chartConfig={{
-          backgroundColor: "#fff",
-          backgroundGradientFrom: "#fff",
-          backgroundGradientTo: "#fff",
-          decimalPlaces: 0,
-          color: (opacity = 1) => `rgba(0,0,255,${opacity})`,
-          labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
-          style: { borderRadius: 16 },
-          propsForDots: { r: "4", strokeWidth: "1", stroke: "#0000ff" },
-        }}
-        style={{ marginVertical: 10, borderRadius: 16 }}
-      />
+      <View style={styles.chartContainer}>
+        <Text style={styles.chartTitle}>Price History</Text>
+        <LineChart
+          data={{ labels: dates, datasets: [{ data: prices }] }}
+          width={width - spacing.lg * 2}
+          height={180}
+          yAxisLabel="₹"
+          chartConfig={{
+            backgroundColor: colors.surface,
+            backgroundGradientFrom: colors.surface,
+            backgroundGradientTo: colors.surface,
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+            labelColor: () => colors.text,
+            style: { borderRadius: borderRadius.lg },
+            propsForDots: { r: "4", strokeWidth: "2", stroke: colors.primary },
+          }}
+          style={styles.chart}
+        />
+      </View>
     );
   }, []);
 
-  const renderItem = useCallback(
+  const showItem = useCallback(
     ({ item }) => (
-      <ScrollView style={{ marginBottom: 20 }}>
+      <View style={styles.itemContainer}>
         <ProductCard
           product={item}
           onPress={() =>
             navigation.navigate("ProductDetail", { productId: item.id })
           }
         />
-        {renderPriceGraph(item.priceHistory)}
-      </ScrollView>
+        {showChart(item.priceHistory)}
+      </View>
     ),
-    [navigation]
+    [navigation, showChart]
   );
 
-  const keyExtractor = useCallback((item) => item.id.toString(), []);
+  const getKey = useCallback((item) => item.id.toString(), []);
 
-  if (loading)
-    return <ActivityIndicator size="large" style={{ marginTop: 20 }} />;
+  if (isLoading)
+    return (
+      <SafeAreaView style={commonStyles.container}>
+        <View style={commonStyles.columnCenter}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[commonStyles.bodyMedium, styles.loadingText]}>
+            Loading products...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles.filterContainer}>
+    <SafeAreaView style={commonStyles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Products</Text>
+      </View>
+
+      {/* Fixed Filters (NOT inside FlatList) */}
+      <View style={styles.filtersContainer}>
         <TextInput
-          placeholder="Search..."
-          value={searchQuery} // only tied to typing
-          onChangeText={setSearchQuery} // smooth typing
-          style={styles.input}
+          placeholder="Search products..."
+          value={typing}
+          onChangeText={setTyping}
+          style={styles.searchInput}
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"
           blurOnSubmit={false}
           clearButtonMode="while-editing"
           selectTextOnFocus={true}
+          placeholderTextColor={colors.textTertiary}
         />
-        <Picker
-          selectedValue={brandFilter}
-          onValueChange={setBrandFilter}
-          style={styles.picker}
-        >
-          <Picker.Item label="All Brands" value="" />
-          <Picker.Item label="Apple" value="Apple" />
-          <Picker.Item label="Samsung" value="Samsung" />
-          <Picker.Item label="Vivo" value="Vivo" />
-        </Picker>
-        <Picker
-          selectedValue={sortOption}
-          onValueChange={setSortOption}
-          style={styles.picker}
-        >
-          <Picker.Item label="Sort By" value="" />
-          <Picker.Item label="Price Low to High" value="priceAsc" />
-          <Picker.Item label="Price High to Low" value="priceDesc" />
-          <Picker.Item label="Rating High to Low" value="ratingDesc" />
-        </Picker>
+
+        <View style={styles.pickerRow}>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={brand}
+              onValueChange={setBrand}
+              style={styles.picker}
+              mode="dropdown"
+            >
+              <Picker.Item label="All Brands" value="" />
+              <Picker.Item label="Apple" value="Apple" />
+              <Picker.Item label="Nothing" value="Nothing" />
+              <Picker.Item label="OnePlus" value="OnePlus" />
+              <Picker.Item label="Oppo" value="Oppo" />
+              <Picker.Item label="Realme" value="Realme" />
+              <Picker.Item label="Samsung" value="Samsung" />
+              <Picker.Item label="Vivo" value="Vivo" />
+              <Picker.Item label="Xiaomi" value="Xiaomi" />
+            </Picker>
+          </View>
+
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={sortBy}
+              onValueChange={setSortBy}
+              style={styles.picker}
+              mode="dropdown"
+            >
+              <Picker.Item label="Default" value="" />
+              <Picker.Item label="Price Low to High" value="priceAsc" />
+              <Picker.Item label="Price High to Low" value="priceDesc" />
+              <Picker.Item label="Rating High to Low" value="ratingDesc" />
+            </Picker>
+          </View>
+        </View>
       </View>
+
+      {/* Scrollable product list */}
       <FlatList
-        data={products}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
+        data={items}
+        keyExtractor={getKey}
+        renderItem={showItem}
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}
         windowSize={10}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  filterContainer: { padding: 10, backgroundColor: "#f2f2f2" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 10,
+  header: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  picker: { marginBottom: 10 },
+  headerTitle: {
+    fontSize: typography.fontSize.xxl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text,
+  },
+  filtersContainer: {
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    zIndex: 100,      // ensures filters float above list
+    elevation: 8,     // Android fix
+  },
+  searchInput: {
+    ...commonStyles.input,
+    marginBottom: spacing.sm,
+    fontSize: typography.fontSize.md,
+  },
+  pickerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: spacing.md,
+    zIndex: 101,      // higher than FlatList
+  },
+  pickerContainer: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    height: 45,
+    justifyContent: "center",
+    zIndex: 20, // fixes dropdown collapsing under list
+    elevation: 5, // Android fix
+  },
+  picker: {
+    height: 45,
+    color: colors.text,
+  },
+  listContent: {
+    paddingVertical: spacing.sm,
+  },
+  itemContainer: {
+    marginBottom: spacing.md,
+  },
+  chartContainer: {
+    backgroundColor: colors.surface,
+    margin: spacing.sm,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.sm,
+  },
+  chartTitle: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  chart: {
+    borderRadius: borderRadius.md,
+  },
+  loadingText: {
+    marginTop: spacing.sm,
+  },
 });
 
 export default React.memo(ProductListScreen);
