@@ -233,6 +233,7 @@ const ProductList = ({ navigation }) => {
           >
             <TouchableOpacity
               style={[styles.pill, selectedBrand === "" && styles.active]}
+              onPress={() => setSelectedBrand("")}
             >
               <Text
                 style={[

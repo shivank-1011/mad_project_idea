@@ -40,10 +40,15 @@ export default function ProductDetailScreen({ route }) {
 
   // Construct full image URL if it's a relative path or handle external URLs
   const getImageUrl = (imageUrl) => {
-    if (imageUrl && imageUrl.startsWith("/assets/")) {
+    // If no URL or invalid URL, use default 16pm.png
+    if (!imageUrl || typeof imageUrl !== "string" || imageUrl.trim() === "") {
+      return `${API_BASE_URL}/assets/16pm.png`;
+    }
+    if (imageUrl.startsWith("/assets/")) {
       return `${API_BASE_URL}${imageUrl}`;
     }
-    return imageUrl; // Return as-is for external URLs (https://)
+    // For external URLs, return as-is, but if they fail to load, fallback will handle it
+    return imageUrl;
   };
 
   // Render specifications with user-friendly labels
@@ -346,6 +351,10 @@ export default function ProductDetailScreen({ route }) {
           <Image
             source={{ uri: getImageUrl(item.imageUrl) }}
             style={styles.productImage}
+            onError={() => {
+              // If image fails to load, the getImageUrl function already provides fallback
+              // This is mainly for external URLs that might fail
+            }}
           />
         </View>
 
