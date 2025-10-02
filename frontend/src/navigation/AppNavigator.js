@@ -1,7 +1,7 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HomeScreen from "../screens/HomeScreen";
-import ProductListScreen from "../screens/ProductListScreen";
+import Home from "../screens/HomeScreen";
+import ProductList from "../screens/ProductListScreen";
 import ProductDetailScreen from "../screens/ProductDetailScreen";
 import ComparisonScreen from "../screens/ComparisionScreen";
 import ChatbotScreen from "../screens/ChatbotScreen";
@@ -28,12 +28,12 @@ export default function AppNavigator() {
     <Stack.Navigator initialRouteName="Home" screenOptions={screenOptions}>
       <Stack.Screen
         name="Home"
-        component={HomeScreen}
-        options={{ title: "SmartShop" }}
+        component={Home}
+        options={{ title: "SpecSnap" }}
       />
       <Stack.Screen
         name="Products"
-        component={ProductListScreen}
+        component={ProductList}
         options={{ title: "Products" }}
       />
       <Stack.Screen

@@ -19,33 +19,33 @@ import {
   typography,
 } from "../styles/theme";
 
-export default function Chatbot() {
-  const [text, setText] = useState("");
-  const [chat, setChat] = useState([
+export default function Chat() {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
     {
       role: "bot",
       content:
         "Hi! I'm your AI assistant. Ask me anything about smartphones, and I'll help you find the perfect device for your needs!",
     },
   ]);
-  const [isLoading, setIsLoading] = useState(false);
-  const scrollViewRef = useRef();
+  const [loading, setLoading] = useState(false);
+  const scrollRef = useRef();
 
   const send = async () => {
-    if (!text.trim()) return;
+    if (!input.trim()) return;
 
-    setIsLoading(true);
-    const userMsg = { role: "user", content: text };
-    const newChat = [...chat, userMsg];
-    setChat(newChat);
-    setText("");
+    setLoading(true);
+    const userMsg = { role: "user", content: input };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
 
     try {
-      const reply = await getAIRecommendation({ query: text });
-      setChat([...newChat, { role: "bot", content: reply }]);
+      const reply = await getAIRecommendation({ query: input });
+      setMessages([...newMessages, { role: "bot", content: reply }]);
     } catch (error) {
-      setChat([
-        ...newChat,
+      setMessages([
+        ...newMessages,
         {
           role: "bot",
           content:
@@ -53,35 +53,29 @@ export default function Chatbot() {
         },
       ]);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [chat]);
+    scrollRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
-  const renderMessage = (msg, index) => {
+  const showMessage = (msg, index) => {
     const isUser = msg.role === "user";
     return (
       <View
         key={index}
         style={[
-          styles.messageContainer,
-          isUser ? styles.userMessageContainer : styles.botMessageContainer,
+          styles.message,
+          isUser ? styles.userMessage : styles.botMessage,
         ]}
       >
         <View
-          style={[
-            styles.messageBubble,
-            isUser ? styles.userBubble : styles.botBubble,
-          ]}
+          style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}
         >
           <Text
-            style={[
-              styles.messageText,
-              isUser ? styles.userText : styles.botText,
-            ]}
+            style={[styles.text, isUser ? styles.userText : styles.botText]}
           >
             {msg.content}
           </Text>
@@ -93,27 +87,23 @@ export default function Chatbot() {
   return (
     <SafeAreaView style={commonStyles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>AI Assistant</Text>
-        <Text style={styles.headerSubtitle}>
+        <Text style={styles.title}>AI Assistant</Text>
+        <Text style={styles.subtitle}>
           Get personalized phone recommendations
         </Text>
       </View>
 
       <ScrollView
-        ref={scrollViewRef}
-        style={styles.chatContainer}
-        contentContainerStyle={styles.chatContent}
+        ref={scrollRef}
+        style={styles.chat}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {chat.map(renderMessage)}
-        {isLoading && (
-          <View style={[styles.messageContainer, styles.botMessageContainer]}>
+        {messages.map(showMessage)}
+        {loading && (
+          <View style={[styles.message, styles.botMessage]}>
             <View
-              style={[
-                styles.messageBubble,
-                styles.botBubble,
-                styles.loadingBubble,
-              ]}
+              style={[styles.bubble, styles.botBubble, styles.loadingBubble]}
             >
               <Text style={styles.loadingText}>Thinking...</Text>
             </View>
@@ -121,23 +111,23 @@ export default function Chatbot() {
         )}
       </ScrollView>
 
-      <View style={styles.inputContainer}>
+      <View style={styles.inputBox}>
         <TextInput
-          value={text}
-          onChangeText={setText}
-          style={styles.input}
+          value={input}
+          onChangeText={setInput}
+          style={styles.field}
           placeholder="Ask about smartphones..."
           placeholderTextColor={colors.textTertiary}
           multiline
           maxLength={500}
-          editable={!isLoading}
+          editable={!loading}
         />
         <CustomButton
           title="Send"
           onPress={send}
-          disabled={!text.trim() || isLoading}
-          loading={isLoading}
-          style={styles.sendButton}
+          disabled={!input.trim() || loading}
+          loading={loading}
+          style={styles.send}
         />
       </View>
     </SafeAreaView>
@@ -151,34 +141,34 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  headerTitle: {
+  title: {
     fontSize: typography.fontSize.xxl,
     fontWeight: typography.fontWeight.bold,
     color: colors.text,
   },
-  headerSubtitle: {
+  subtitle: {
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
     marginTop: spacing.xs,
   },
-  chatContainer: {
+  chat: {
     flex: 1,
     backgroundColor: colors.background,
   },
-  chatContent: {
+  content: {
     padding: spacing.md,
     paddingBottom: spacing.lg,
   },
-  messageContainer: {
+  message: {
     marginVertical: spacing.xs,
   },
-  userMessageContainer: {
+  userMessage: {
     alignItems: "flex-end",
   },
-  botMessageContainer: {
+  botMessage: {
     alignItems: "flex-start",
   },
-  messageBubble: {
+  bubble: {
     maxWidth: "80%",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -198,7 +188,7 @@ const styles = StyleSheet.create({
   loadingBubble: {
     opacity: 0.7,
   },
-  messageText: {
+  text: {
     fontSize: typography.fontSize.md,
     lineHeight: typography.fontSize.md * typography.lineHeight.normal,
   },
@@ -212,7 +202,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontStyle: "italic",
   },
-  inputContainer: {
+  inputBox: {
     backgroundColor: colors.surface,
     padding: spacing.md,
     borderTopWidth: 1,
@@ -222,7 +212,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     ...shadows.lg,
   },
-  input: {
+  field: {
     flex: 1,
     backgroundColor: colors.background,
     borderWidth: 1,
@@ -234,7 +224,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     maxHeight: 100,
   },
-  sendButton: {
+  send: {
     paddingHorizontal: spacing.lg,
     minWidth: 80,
   },

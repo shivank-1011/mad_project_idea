@@ -15,9 +15,12 @@ model Product {
   brand         String
   specs         Json
   price         Float
-  rating        Float
+  rating        Float?
+  totalRatings  String?
+  releaseDate   String?
   imageUrl      String
-  affiliateLink String
+  affiliateLink String?
+  expertView    String? @db.Text
   priceHistory  PriceHistory[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

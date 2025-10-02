@@ -1,7 +1,13 @@
 import React from "react";
-import { TouchableOpacity, Text, ActivityIndicator, View } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  View,
+  Animated,
+} from "react-native";
 import { commonStyles } from "../styles/commonStyles";
-import { colors } from "../styles/theme";
+import { colors, shadows } from "../styles/theme";
 
 export const CustomButton = ({
   title,
@@ -9,16 +15,29 @@ export const CustomButton = ({
   variant = "primary",
   disabled = false,
   loading = false,
+  gradient = false,
   style,
   textStyle,
   ...props
 }) => {
-  const getButtonStyle = () => {
+  const scale = React.useRef(new Animated.Value(1)).current;
+
+  const getStyle = () => {
     switch (variant) {
       case "secondary":
         return commonStyles.buttonSecondary;
       case "outline":
         return commonStyles.buttonOutline;
+      case "ghost":
+        return {
+          backgroundColor: colors.overlay,
+          borderRadius: 16,
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 44,
+        };
       default:
         return commonStyles.buttonPrimary;
     }
@@ -29,26 +48,41 @@ export const CustomButton = ({
       case "secondary":
         return commonStyles.buttonTextSecondary;
       case "outline":
-        return commonStyles.buttonTextOutline;
+        return { ...commonStyles.buttonTextSecondary, color: colors.primary };
+      case "ghost":
+        return { ...commonStyles.buttonText, color: colors.text };
       default:
-        return commonStyles.buttonText;
+        return commonStyles.buttonTextPrimary;
     }
   };
 
-  const buttonOpacity = disabled || loading ? 0.5 : 1;
+  const opacity = disabled || loading ? 0.6 : 1;
 
-  return (
-    <TouchableOpacity
-      style={[getButtonStyle(), { opacity: buttonOpacity }, style]}
-      onPress={disabled || loading ? null : onPress}
-      disabled={disabled || loading}
-      {...props}
-    >
+  const pressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.96,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const pressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const Content = () => (
+    <>
       {loading ? (
         <View style={commonStyles.row}>
           <ActivityIndicator
             size="small"
-            color={variant === "primary" ? colors.surface : colors.primary}
+            color={
+              variant === "primary" || gradient
+                ? colors.textInverse
+                : colors.primary
+            }
             style={{ marginRight: 8 }}
           />
           <Text style={[getTextStyle(), textStyle]}>Loading...</Text>
@@ -56,6 +90,56 @@ export const CustomButton = ({
       ) : (
         <Text style={[getTextStyle(), textStyle]}>{title}</Text>
       )}
-    </TouchableOpacity>
+    </>
+  );
+
+  if (gradient && variant === "primary") {
+    return (
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <TouchableOpacity
+          onPress={disabled || loading ? null : onPress}
+          onPressIn={pressIn}
+          onPressOut={pressOut}
+          disabled={disabled || loading}
+          activeOpacity={0.8}
+          {...props}
+        >
+          <View
+            style={[
+              {
+                backgroundColor: colors.primary,
+                borderRadius: 16,
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 52,
+                opacity,
+                ...shadows.glow,
+              },
+              style,
+            ]}
+          >
+            <Content />
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <TouchableOpacity
+        style={[getStyle(), { opacity }, style]}
+        onPress={disabled || loading ? null : onPress}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+        disabled={disabled || loading}
+        activeOpacity={0.8}
+        {...props}
+      >
+        <Content />
+      </TouchableOpacity>
+    </Animated.View>
   );
 };

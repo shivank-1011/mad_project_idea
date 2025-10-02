@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { colors, typography, spacing, borderRadius, shadows } from "./theme";
 
 export const commonStyles = StyleSheet.create({
-  // Container styles
+  // Enhanced Container styles
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -11,37 +11,43 @@ export const commonStyles = StyleSheet.create({
   safeContainer: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
 
   scrollContainer: {
     flexGrow: 1,
     backgroundColor: colors.background,
+    paddingBottom: spacing.xl,
   },
 
-  // Card styles
+  // Modern Card styles
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginVertical: spacing.sm,
-    ...shadows.sm,
-  },
-
-  cardLarge: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginVertical: spacing.md,
-    ...shadows.md,
+    borderWidth: 0.5,
+    borderColor: colors.borderLight,
+    ...shadows.card,
   },
 
-  // Text styles
+  cardLarge: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    marginVertical: spacing.lg,
+    borderWidth: 0.5,
+    borderColor: colors.borderLight,
+    ...shadows.lg,
+  },
+
+  // Enhanced Text styles
   headingLarge: {
     fontSize: typography.fontSize.heading,
     fontWeight: typography.fontWeight.bold,
     color: colors.text,
-    lineHeight: typography.fontSize.heading * typography.lineHeight.tight,
+    lineHeight: typography.fontSize.heading * typography.lineHeight.snug,
+    letterSpacing: typography.letterSpacing.tight,
     marginBottom: spacing.md,
   },
 
@@ -49,8 +55,9 @@ export const commonStyles = StyleSheet.create({
     fontSize: typography.fontSize.xxl,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text,
-    lineHeight: typography.fontSize.xxl * typography.lineHeight.tight,
-    marginBottom: spacing.sm,
+    lineHeight: typography.fontSize.xxl * typography.lineHeight.snug,
+    letterSpacing: typography.letterSpacing.normal,
+    marginBottom: spacing.md,
   },
 
   headingSmall: {
@@ -58,83 +65,94 @@ export const commonStyles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
     color: colors.text,
     lineHeight: typography.fontSize.lg * typography.lineHeight.normal,
+    letterSpacing: typography.letterSpacing.normal,
     marginBottom: spacing.sm,
   },
 
   bodyLarge: {
-    fontSize: typography.fontSize.md,
+    fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.normal,
     color: colors.text,
-    lineHeight: typography.fontSize.md * typography.lineHeight.normal,
+    lineHeight: typography.fontSize.lg * typography.lineHeight.relaxed,
+    letterSpacing: typography.letterSpacing.normal,
   },
 
   bodyMedium: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text,
+    lineHeight: typography.fontSize.md * typography.lineHeight.relaxed,
+    letterSpacing: typography.letterSpacing.normal,
+  },
+
+  bodySmall: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.normal,
     color: colors.textSecondary,
     lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
   },
 
-  bodySmall: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.normal,
-    color: colors.textTertiary,
-    lineHeight: typography.fontSize.xs * typography.lineHeight.normal,
-  },
-
-  // Button styles
+  // Modern Button styles
   buttonPrimary: {
     backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     alignItems: "center",
     justifyContent: "center",
-    ...shadows.sm,
+    minHeight: 52,
+    ...shadows.md,
   },
 
   buttonSecondary: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderWidth: 1.5,
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.primary,
+    minHeight: 52,
     ...shadows.sm,
   },
 
   buttonOutline: {
     backgroundColor: "transparent",
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderWidth: 2,
+    borderColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
+    minHeight: 52,
   },
 
   buttonText: {
     fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.surface,
+    textAlign: "center",
+    letterSpacing: typography.letterSpacing.normal,
+  },
+
+  buttonTextPrimary: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.textInverse,
+    textAlign: "center",
+    letterSpacing: typography.letterSpacing.normal,
   },
 
   buttonTextSecondary: {
     fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semibold,
+    fontWeight: typography.fontWeight.medium,
     color: colors.primary,
+    textAlign: "center",
+    letterSpacing: typography.letterSpacing.normal,
   },
 
-  buttonTextOutline: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.text,
-  },
-
-  // Layout helpers
+  // Layout styles
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -146,70 +164,46 @@ export const commonStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  rowCenter: {
+  center: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // Price styles
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    flexWrap: "wrap",
+  },
+
+  priceSymbol: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.primary,
+  },
+
+  priceAmount: {
+    fontSize: typography.fontSize.xxl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
+    letterSpacing: typography.letterSpacing.tight,
+  },
+
+  // Rating styles
+  ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
   },
 
-  column: {
-    flexDirection: "column",
-  },
-
-  columnCenter: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  // Spacing helpers
-  marginTopSm: { marginTop: spacing.sm },
-  marginTopMd: { marginTop: spacing.md },
-  marginTopLg: { marginTop: spacing.lg },
-
-  marginBottomSm: { marginBottom: spacing.sm },
-  marginBottomMd: { marginBottom: spacing.md },
-  marginBottomLg: { marginBottom: spacing.lg },
-
-  paddingHorizontalMd: { paddingHorizontal: spacing.md },
-  paddingVerticalMd: { paddingVertical: spacing.md },
-
-  // Image styles
-  imageRounded: {
-    borderRadius: borderRadius.md,
-  },
-
-  imageCircle: {
-    borderRadius: borderRadius.round,
-  },
-
-  // Input styles
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+  ratingStars: {
     fontSize: typography.fontSize.md,
-    color: colors.text,
+    color: colors.warning,
+    marginRight: spacing.xs,
   },
 
-  inputFocused: {
-    borderColor: colors.primary,
-    ...shadows.sm,
-  },
-
-  // Status styles
-  successText: { color: colors.success },
-  warningText: { color: colors.warning },
-  errorText: { color: colors.error },
-  infoText: { color: colors.info },
-
-  // Divider
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginVertical: spacing.md,
+  ratingText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.textSecondary,
   },
 });

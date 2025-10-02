@@ -66,99 +66,106 @@ export default function ComparisonScreen() {
       </View>
 
       <ScrollView
-        horizontal
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scrollContent}
-        showsHorizontalScrollIndicator={false}
+        style={styles.mainScrollContainer}
+        showsVerticalScrollIndicator={true}
       >
-        <View style={styles.tableContainer}>
-          {/* Headers Row */}
-          <View style={styles.headerRow}>
-            <View style={styles.labelColumn}>
-              <Text style={styles.fieldLabel}></Text>
-            </View>
-            {comparisonList.map((item) => (
-              <View key={item.id} style={styles.productColumn}>
-                <View style={styles.productHeader}>
-                  <Image
-                    source={{ uri: getImageUrl(item.imageUrl) }}
-                    style={styles.productImage}
-                  />
-                  <Text style={styles.productName} numberOfLines={2}>
-                    {item.name}
-                  </Text>
-                  <CustomButton
-                    title="Remove"
-                    onPress={() => removeFromComparison(item.id)}
-                    variant="outline"
-                    style={styles.removeButton}
-                  />
-                </View>
+        <ScrollView
+          horizontal
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsHorizontalScrollIndicator={false}
+        >
+          <View style={styles.tableContainer}>
+            {/* Headers Row */}
+            <View style={styles.headerRow}>
+              <View style={styles.labelColumn}>
+                <Text style={styles.fieldLabel}></Text>
               </View>
-            ))}
-          </View>
-
-          {/* Data Rows */}
-          <View style={styles.dataRow}>
-            <View style={styles.labelColumn}>
-              <Text style={styles.fieldLabel}>Brand</Text>
-            </View>
-            {comparisonList.map((item) => (
-              <View key={item.id} style={styles.productColumn}>
-                <Text style={styles.fieldValue}>{item.brand}</Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={[styles.dataRow, styles.alternateRow]}>
-            <View style={styles.labelColumn}>
-              <Text style={styles.fieldLabel}>Price</Text>
-            </View>
-            {comparisonList.map((item) => (
-              <View key={item.id} style={styles.productColumn}>
-                <Text style={[styles.fieldValue, styles.priceText]}>
-                  ₹{item.price.toLocaleString()}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.dataRow}>
-            <View style={styles.labelColumn}>
-              <Text style={styles.fieldLabel}>Rating</Text>
-            </View>
-            {comparisonList.map((item) => (
-              <View key={item.id} style={styles.productColumn}>
-                <Text style={styles.starsText}>{renderStars(item.rating)}</Text>
-                <Text style={styles.ratingValue}>{item.rating}/5</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Specifications */}
-          {comparisonList.length > 0 &&
-            comparisonList[0].specs &&
-            Object.keys(comparisonList[0].specs).map((specKey, index) => (
-              <View
-                key={specKey}
-                style={[
-                  styles.dataRow,
-                  index % 2 === 1 ? styles.alternateRow : null,
-                ]}
-              >
-                <View style={styles.labelColumn}>
-                  <Text style={styles.fieldLabel}>{specKey}</Text>
-                </View>
-                {comparisonList.map((item) => (
-                  <View key={item.id} style={styles.productColumn}>
-                    <Text style={styles.fieldValue}>
-                      {item.specs[specKey] || "N/A"}
+              {comparisonList.map((item) => (
+                <View key={item.id} style={styles.productColumn}>
+                  <View style={styles.productHeader}>
+                    <Image
+                      source={{ uri: getImageUrl(item.imageUrl) }}
+                      style={styles.productImage}
+                    />
+                    <Text style={styles.productName} numberOfLines={2}>
+                      {item.name}
                     </Text>
+                    <CustomButton
+                      title="Remove"
+                      onPress={() => removeFromComparison(item.id)}
+                      variant="outline"
+                      style={styles.removeButton}
+                    />
                   </View>
-                ))}
+                </View>
+              ))}
+            </View>
+
+            {/* Data Rows */}
+            <View style={styles.dataRow}>
+              <View style={styles.labelColumn}>
+                <Text style={styles.fieldLabel}>Brand</Text>
               </View>
-            ))}
-        </View>
+              {comparisonList.map((item) => (
+                <View key={item.id} style={styles.productColumn}>
+                  <Text style={styles.fieldValue}>{item.brand}</Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={[styles.dataRow, styles.alternateRow]}>
+              <View style={styles.labelColumn}>
+                <Text style={styles.fieldLabel}>Price</Text>
+              </View>
+              {comparisonList.map((item) => (
+                <View key={item.id} style={styles.productColumn}>
+                  <Text style={[styles.fieldValue, styles.priceText]}>
+                    ₹{item.price.toLocaleString()}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={styles.dataRow}>
+              <View style={styles.labelColumn}>
+                <Text style={styles.fieldLabel}>Rating</Text>
+              </View>
+              {comparisonList.map((item) => (
+                <View key={item.id} style={styles.productColumn}>
+                  <Text style={styles.starsText}>
+                    {renderStars(item.rating)}
+                  </Text>
+                  <Text style={styles.ratingValue}>{item.rating}/5</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Specifications */}
+            {comparisonList.length > 0 &&
+              comparisonList[0].specs &&
+              Object.keys(comparisonList[0].specs).map((specKey, index) => (
+                <View
+                  key={specKey}
+                  style={[
+                    styles.dataRow,
+                    index % 2 === 1 ? styles.alternateRow : null,
+                  ]}
+                >
+                  <View style={styles.labelColumn}>
+                    <Text style={styles.fieldLabel}>{specKey}</Text>
+                  </View>
+                  {comparisonList.map((item) => (
+                    <View key={item.id} style={styles.productColumn}>
+                      <Text style={styles.fieldValue}>
+                        {item.specs[specKey] || "N/A"}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ))}
+          </View>
+        </ScrollView>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -210,6 +217,9 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: "center",
     lineHeight: typography.fontSize.md * typography.lineHeight.normal,
+  },
+  mainScrollContainer: {
+    flex: 1,
   },
   scrollContainer: {
     flex: 1,

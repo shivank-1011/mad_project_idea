@@ -10,25 +10,23 @@ import {
   typography,
 } from "../styles/theme";
 
-export default function ProductCard({ product, onPress }) {
-  // Construct full image URL if it's a relative path or handle external URLs
-  const getImageUrl = (imageUrl) => {
-    if (imageUrl && imageUrl.startsWith("/assets/")) {
-      return `${API_BASE_URL}${imageUrl}`;
+export default function PhoneCard({ product, onPress }) {
+  const getImage = (url) => {
+    if (url && url.startsWith("/assets/")) {
+      return `${API_BASE_URL}${url}`;
     }
-    return imageUrl; // Return as-is for external URLs (https://)
+    return url;
   };
 
-  // Generate star rating display
-  const renderStars = (rating) => {
+  const showStars = (rating) => {
     const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
+    const full = Math.floor(rating);
+    const half = rating % 1 !== 0;
 
-    for (let i = 0; i < fullStars; i++) {
+    for (let i = 0; i < full; i++) {
       stars.push("★");
     }
-    if (hasHalfStar) {
+    if (half) {
       stars.push("☆");
     }
     while (stars.length < 5) {
@@ -39,26 +37,68 @@ export default function ProductCard({ product, onPress }) {
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.imageContainer}>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
+      <View style={styles.image}>
         <Image
-          source={{ uri: getImageUrl(product.imageUrl) }}
-          style={styles.productImage}
+          source={{ uri: getImage(product.imageUrl) }}
+          style={styles.photo}
         />
+        <View style={styles.overlay} />
       </View>
 
-      <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
+      <View style={styles.info}>
+        <Text style={styles.name} numberOfLines={2}>
           {product.name}
         </Text>
         <Text style={styles.brand}>{product.brand}</Text>
 
-        <View style={styles.priceRatingContainer}>
-          <Text style={styles.price}>₹{product.price.toLocaleString()}</Text>
-          <View style={styles.ratingContainer}>
-            <Text style={styles.stars}>{renderStars(product.rating)}</Text>
-            <Text style={styles.ratingText}>{product.rating}</Text>
+        <View style={styles.bottom}>
+          <View style={styles.price}>
+            {product.realTimePrice &&
+            product.realTimePrice !== product.price ? (
+              <>
+                <View style={styles.live}>
+                  <Text style={styles.current}>
+                    ₹{product.realTimePrice.toLocaleString()}
+                  </Text>
+                  <View style={styles.badge}>
+                    <Text style={styles.source}>
+                      {product.cheapestSource === "amazon"
+                        ? "AMZ"
+                        : product.cheapestSource === "flipkart"
+                        ? "FK"
+                        : "LIVE"}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.old}>
+                  ₹{product.price.toLocaleString()}
+                </Text>
+                {product.realTimePrice < product.price && (
+                  <Text style={styles.save}>
+                    Save ₹
+                    {(product.price - product.realTimePrice).toLocaleString()}
+                  </Text>
+                )}
+              </>
+            ) : (
+              <Text style={styles.cost}>
+                {(product.realTimePrice && product.realTimePrice > 0) ||
+                product.price > 0
+                  ? `₹${(product.realTimePrice && product.realTimePrice > 0
+                      ? product.realTimePrice
+                      : product.price
+                    ).toLocaleString()}`
+                  : "Price not available"}
+              </Text>
+            )}
           </View>
+          {product.rating && (
+            <View style={styles.rating}>
+              <Text style={styles.stars}>{showStars(product.rating)}</Text>
+              <Text style={styles.score}>{product.rating}</Text>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -68,50 +108,99 @@ export default function ProductCard({ product, onPress }) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     marginHorizontal: spacing.sm,
-    marginVertical: spacing.sm,
+    marginVertical: spacing.md,
     overflow: "hidden",
-    ...shadows.md,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    ...shadows.card,
   },
-  imageContainer: {
-    backgroundColor: colors.surfaceSecondary,
-    padding: spacing.md,
+  image: {
+    backgroundColor: colors.backgroundSecondary,
+    padding: spacing.lg,
     alignItems: "center",
     justifyContent: "center",
-    height: 180,
+    height: 200,
+    position: "relative",
   },
-  productImage: {
-    width: "100%",
-    height: "100%",
+  photo: {
+    width: "90%",
+    height: "90%",
     resizeMode: "contain",
   },
-  content: {
-    padding: spacing.md,
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.overlay,
+    opacity: 0,
   },
-  title: {
-    fontSize: typography.fontSize.md,
+  info: {
+    padding: spacing.lg,
+  },
+  name: {
+    fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text,
     marginBottom: spacing.xs,
-    lineHeight: typography.fontSize.md * typography.lineHeight.tight,
+    lineHeight: typography.fontSize.lg * typography.lineHeight.snug,
+    letterSpacing: typography.letterSpacing.normal,
   },
   brand: {
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
     marginBottom: spacing.sm,
   },
-  priceRatingContainer: {
+  bottom: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   price: {
+    flex: 1,
+  },
+  cost: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.success,
   },
-  ratingContainer: {
+  live: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 2,
+  },
+  current: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
+    marginRight: spacing.xs,
+  },
+  badge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: borderRadius.xs,
+  },
+  source: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: typography.fontWeight.bold,
+  },
+  old: {
+    fontSize: typography.fontSize.sm,
+    textDecorationLine: "line-through",
+    color: colors.textSecondary,
+    marginBottom: 2,
+  },
+  save: {
+    fontSize: typography.fontSize.xs,
+    color: colors.success,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  rating: {
     flexDirection: "row",
     alignItems: "center",
   },
@@ -120,7 +209,7 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     marginRight: spacing.xs,
   },
-  ratingText: {
+  score: {
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
   },

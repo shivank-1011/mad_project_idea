@@ -1,112 +1,218 @@
-// Modern theme configuration
+// Ultra-modern theme configuration with gradient support
 export const colors = {
-  // Primary colors
-  primary: "#007AFF",
-  primaryDark: "#0056CC",
-  primaryLight: "#5AC8FA",
+  // Primary colors - Modern blue/purple gradient theme
+  primary: "#6C5CE7",
+  primaryDark: "#5F3DC4",
+  primaryLight: "#A29BFE",
+  primaryGradient: ["#6C5CE7", "#A29BFE"],
 
-  // Secondary colors
-  secondary: "#FF9500",
-  secondaryDark: "#FF8C00",
-  secondaryLight: "#FFB84D",
+  // Secondary colors - Warm gradient
+  secondary: "#FD79A8",
+  secondaryDark: "#E84393",
+  secondaryLight: "#FDCB6E",
+  secondaryGradient: ["#FD79A8", "#FDCB6E"],
 
-  // Background colors
-  background: "#F8F9FA",
+  // Tertiary colors - Cool gradient
+  tertiary: "#00CEC9",
+  tertiaryDark: "#00B894",
+  tertiaryLight: "#55EFC4",
+  tertiaryGradient: ["#00CEC9", "#55EFC4"],
+
+  // Background colors - Modern layered design
+  background: "#F8F9FF",
+  backgroundSecondary: "#F1F2FF",
   surface: "#FFFFFF",
-  surfaceSecondary: "#F5F5F7",
+  surfaceSecondary: "#FAFAFF",
+  surfaceElevated: "rgba(255, 255, 255, 0.9)",
+  overlay: "rgba(108, 92, 231, 0.1)",
 
-  // Text colors
-  text: "#1C1C1E",
-  textSecondary: "#6C6C70",
-  textTertiary: "#8E8E93",
+  // Text colors - Enhanced hierarchy
+  text: "#2D3436",
+  textSecondary: "#636E72",
+  textTertiary: "#B2BEC3",
+  textInverse: "#FFFFFF",
+  textMuted: "#A0A6AC",
 
-  // Status colors
-  success: "#28A745",
-  warning: "#FFC107",
-  error: "#DC3545",
-  info: "#17A2B8",
+  // Status colors - Modern and vibrant
+  success: "#00B894",
+  successLight: "#55EFC4",
+  warning: "#FDCB6E",
+  warningLight: "#FEF5E7",
+  error: "#E17055",
+  errorLight: "#FAE5E5",
+  info: "#74B9FF",
+  infoLight: "#E8F4FD",
 
   // Accent colors
-  accent: "#5856D6",
+  accent: "#FF7675",
+  accentSecondary: "#A29BFE",
 
   // Border colors
-  border: "#E5E5EA",
-  borderLight: "#F2F2F7",
+  border: "rgba(108, 92, 231, 0.12)",
+  borderLight: "rgba(108, 92, 231, 0.06)",
+  borderAccent: "rgba(108, 92, 231, 0.25)",
 
-  // Shadow
-  shadow: "rgba(0, 0, 0, 0.1)",
-  shadowDark: "rgba(0, 0, 0, 0.2)",
+  // Shadow colors
+  shadow: "rgba(108, 92, 231, 0.15)",
+  shadowDark: "rgba(108, 92, 231, 0.25)",
+  shadowLight: "rgba(108, 92, 231, 0.08)",
+
+  // Glass morphism
+  glass: "rgba(255, 255, 255, 0.25)",
+  glassDark: "rgba(45, 52, 54, 0.25)",
 };
 
 export const typography = {
-  // Font sizes
+  // Enhanced font sizes with better scaling
   fontSize: {
-    xs: 12,
-    sm: 14,
-    md: 16,
-    lg: 18,
-    xl: 20,
-    xxl: 24,
-    xxxl: 28,
-    heading: 32,
+    xs: 11,
+    sm: 13,
+    md: 15,
+    lg: 17,
+    xl: 19,
+    xxl: 22,
+    xxxl: 26,
+    heading: 30,
+    display: 36,
+    hero: 42,
   },
 
-  // Font weights - using string values that work across platforms
+  // Font weights - enhanced hierarchy
   fontWeight: {
-    light: "normal", // Use 'normal' instead of '300' for better compatibility
-    normal: "normal",
+    light: "300",
+    normal: "400",
     medium: "500",
     semibold: "600",
-    bold: "bold", // Use 'bold' instead of '700'
+    bold: "700",
+    heavy: "800",
   },
 
-  // Line heights
+  // Line heights for better readability
   lineHeight: {
-    tight: 1.2,
+    tight: 1.15,
+    snug: 1.25,
     normal: 1.4,
+    relaxed: 1.5,
     loose: 1.6,
+  },
+
+  // Letter spacing for modern typography
+  letterSpacing: {
+    tighter: -0.5,
+    tight: -0.25,
+    normal: 0,
+    wide: 0.25,
+    wider: 0.5,
+    widest: 1,
   },
 };
 
 export const spacing = {
+  xxs: 2,
   xs: 4,
   sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-  xxxl: 64,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+  huge: 40,
+  massive: 48,
 };
 
 export const borderRadius = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  xxl: 20,
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 28,
   round: 50,
+  pill: 999,
 };
 
 export const shadows = {
-  sm: {
+  xs: {
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
+    elevation: 1,
+  },
+  sm: {
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
     elevation: 2,
   },
   md: {
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowRadius: 6,
     elevation: 4,
   },
   lg: {
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  xl: {
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  // Special shadows
+  glow: {
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+  },
+  card: {
+    shadowColor: colors.shadowLight,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+};
+
+// Animation durations
+export const animations = {
+  fast: 150,
+  normal: 250,
+  slow: 350,
+  slower: 500,
+};
+
+// Gradients helper
+export const gradients = {
+  primary: {
+    colors: colors.primaryGradient,
+    start: { x: 0, y: 0 },
+    end: { x: 1, y: 1 },
+  },
+  secondary: {
+    colors: colors.secondaryGradient,
+    start: { x: 0, y: 0 },
+    end: { x: 1, y: 0 },
+  },
+  tertiary: {
+    colors: colors.tertiaryGradient,
+    start: { x: 0, y: 0 },
+    end: { x: 1, y: 1 },
+  },
+  success: {
+    colors: [colors.success, colors.successLight],
+    start: { x: 0, y: 0 },
+    end: { x: 1, y: 0 },
   },
 };

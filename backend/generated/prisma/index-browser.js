@@ -127,8 +127,11 @@ exports.Prisma.ProductScalarFieldEnum = {
   specs: 'specs',
   price: 'price',
   rating: 'rating',
+  totalRatings: 'totalRatings',
+  releaseDate: 'releaseDate',
   imageUrl: 'imageUrl',
   affiliateLink: 'affiliateLink',
+  expertView: 'expertView',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -160,11 +163,19 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 exports.Prisma.ProductOrderByRelevanceFieldEnum = {
   name: 'name',
   brand: 'brand',
+  totalRatings: 'totalRatings',
+  releaseDate: 'releaseDate',
   imageUrl: 'imageUrl',
-  affiliateLink: 'affiliateLink'
+  affiliateLink: 'affiliateLink',
+  expertView: 'expertView'
 };
 
 

@@ -99,8 +99,11 @@ exports.Prisma.ProductScalarFieldEnum = {
   specs: 'specs',
   price: 'price',
   rating: 'rating',
+  totalRatings: 'totalRatings',
+  releaseDate: 'releaseDate',
   imageUrl: 'imageUrl',
   affiliateLink: 'affiliateLink',
+  expertView: 'expertView',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -132,11 +135,19 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 exports.Prisma.ProductOrderByRelevanceFieldEnum = {
   name: 'name',
   brand: 'brand',
+  totalRatings: 'totalRatings',
+  releaseDate: 'releaseDate',
   imageUrl: 'imageUrl',
-  affiliateLink: 'affiliateLink'
+  affiliateLink: 'affiliateLink',
+  expertView: 'expertView'
 };
 
 
@@ -183,7 +194,6 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -192,13 +202,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Product {\n  id            Int            @id @default(autoincrement())\n  name          String\n  brand         String\n  specs         Json\n  price         Float\n  rating        Float\n  imageUrl      String\n  affiliateLink String\n  priceHistory  PriceHistory[]\n  createdAt     DateTime       @default(now())\n  updatedAt     DateTime       @updatedAt\n}\n\nmodel PriceHistory {\n  id        Int      @id @default(autoincrement())\n  product   Product  @relation(fields: [productId], references: [id])\n  productId Int\n  price     Float\n  date      DateTime @default(now())\n}\n",
-  "inlineSchemaHash": "d5076f5ab5b3051c7276978b22d400089f52a94b0c17b01677d6542c92700c31",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Product {\n  id            Int            @id @default(autoincrement())\n  name          String\n  brand         String\n  specs         Json\n  price         Float\n  rating        Float?\n  totalRatings  String?\n  releaseDate   String?\n  imageUrl      String\n  affiliateLink String?\n  expertView    String?        @db.Text\n  priceHistory  PriceHistory[]\n  createdAt     DateTime       @default(now())\n  updatedAt     DateTime       @updatedAt\n}\n\nmodel PriceHistory {\n  id        Int      @id @default(autoincrement())\n  product   Product  @relation(fields: [productId], references: [id])\n  productId Int\n  price     Float\n  date      DateTime @default(now())\n}\n",
+  "inlineSchemaHash": "9d356ec7e78bf1820dce4d982b07eea0002c7f287945b53578556014775f6e11",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Product\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"brand\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"specs\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"rating\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"affiliateLink\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priceHistory\",\"kind\":\"object\",\"type\":\"PriceHistory\",\"relationName\":\"PriceHistoryToProduct\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"PriceHistory\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"PriceHistoryToProduct\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"date\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Product\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"brand\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"specs\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"rating\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"totalRatings\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"releaseDate\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"affiliateLink\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expertView\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priceHistory\",\"kind\":\"object\",\"type\":\"PriceHistory\",\"relationName\":\"PriceHistoryToProduct\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"PriceHistory\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"PriceHistoryToProduct\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"date\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
