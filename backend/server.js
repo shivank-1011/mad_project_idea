@@ -1,29 +1,49 @@
-require("dotenv").config();
+require("dotenv").config({ debug: false });
 const app = require("./app");
 const phoneDataScheduler = require("./services/phoneDataScheduler");
+const { PrismaClient } = require("./generated/prisma");
 const PORT = process.env.PORT || 3001;
 
+const prisma = new PrismaClient();
+
+// Test database connection
+async function testDatabaseConnection() {
+  try {
+    await prisma.$connect();
+    console.log("Database connection successful");
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+    console.error("Please check your DATABASE_URL in .env file");
+    process.exit(1);
+  }
+}
+
 // Start the server
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📅 Phone data scheduler is running with automated updates`);
-});
+async function startServer() {
+  try {
+    await testDatabaseConnection();
 
-// Graceful shutdown
-process.on("SIGTERM", async () => {
-  console.log("📴 SIGTERM received, shutting down gracefully...");
-  server.close(() => {
-    console.log("🛑 HTTP server closed");
-  });
-  await phoneDataScheduler.shutdown();
-  process.exit(0);
-});
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
 
-process.on("SIGINT", async () => {
-  console.log("📴 SIGINT received, shutting down gracefully...");
-  server.close(() => {
-    console.log("🛑 HTTP server closed");
-  });
-  await phoneDataScheduler.shutdown();
-  process.exit(0);
-});
+    // Graceful shutdown
+    const shutdown = async () => {
+      console.log("Shutting down gracefully...");
+      server.close(() => {
+        console.log("HTTP server closed");
+      });
+      await phoneDataScheduler.shutdown();
+      await prisma.$disconnect();
+      process.exit(0);
+    };
+
+    process.on("SIGTERM", shutdown);
+    process.on("SIGINT", shutdown);
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();

@@ -25,4 +25,19 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend server is running!" });
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Server Error:", err);
+  console.error("Stack trace:", err.stack);
+  res.status(500).json({
+    error: err.message || "Internal server error",
+    details: process.env.NODE_ENV === "development" ? err.stack : undefined,
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
 module.exports = app;

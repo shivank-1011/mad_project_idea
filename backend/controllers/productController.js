@@ -90,7 +90,12 @@ exports.getProducts = async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("💥 Error in getProducts:", err);
+    console.error("Stack trace:", err.stack);
+    res.status(500).json({
+      error: err.message,
+      details: "Failed to fetch products from database",
+    });
   }
 };
 

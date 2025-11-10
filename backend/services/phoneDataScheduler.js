@@ -44,10 +44,11 @@ class PhoneDataScheduler {
       await this.performCleanup();
     });
 
-    console.log("📅 Phone data scheduler initialized with the following jobs:");
-    console.log("   - Daily full scrape: 2:00 AM");
-    console.log("   - Price updates: Every 6 hours");
-    console.log("   - Weekly cleanup: 3:00 AM on Sundays");
+    // Uncomment below to see scheduler details on startup
+    // console.log("📅 Phone data scheduler initialized with the following jobs:");
+    // console.log("   - Daily full scrape: 2:00 AM");
+    // console.log("   - Price updates: Every 6 hours");
+    // console.log("   - Weekly cleanup: 3:00 AM on Sundays");
   }
 
   /**
