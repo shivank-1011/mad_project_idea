@@ -4,7 +4,7 @@ class ComprehensivePhoneDataService {
   constructor() {
     this.cache = new Map();
 
-    // Phone specifications data with realistic details
+
     this.phoneDatabase = {
       Apple: {
         models: [
@@ -1080,9 +1080,7 @@ class ComprehensivePhoneDataService {
     };
   }
 
-  /**
-   * Generate comprehensive phone data
-   */
+
   async generateComprehensivePhoneData() {
     console.log("📱 Generating comprehensive phone database...");
 
@@ -1092,13 +1090,13 @@ class ComprehensivePhoneDataService {
       console.log(`📱 Processing ${brand} phones...`);
 
       for (const model of data.models) {
-        // Generate variants for each storage option
+
         for (const storage of model.variants) {
           const storageMultiplier = this.getStorageMultiplier(storage);
           const finalPrice = Math.round(model.basePrice * storageMultiplier);
 
-          // Add some price variation for realism
-          const priceVariation = 1 + (Math.random() - 0.5) * 0.1; // ±5%
+
+          const priceVariation = 1 + (Math.random() - 0.5) * 0.1;
           const marketPrice = Math.round(finalPrice * priceVariation);
 
           const phone = {
@@ -1111,7 +1109,7 @@ class ComprehensivePhoneDataService {
               year: model.year,
             },
             price: marketPrice,
-            rating: model.rating + (Math.random() - 0.5) * 0.2, // Small rating variation
+            rating: model.rating + (Math.random() - 0.5) * 0.2,
             imageUrl: `/assets/phones/${model.name
               .toLowerCase()
               .replace(/\s+/g, "-")}.jpg`,
@@ -1136,7 +1134,7 @@ class ComprehensivePhoneDataService {
       }
     }
 
-    // Add some additional variants and special editions
+
     const additionalPhones = await this.generateSpecialEditions(allPhones);
     allPhones.push(...additionalPhones);
 
@@ -1144,13 +1142,11 @@ class ComprehensivePhoneDataService {
     return allPhones;
   }
 
-  /**
-   * Generate special editions and color variants
-   */
+
   async generateSpecialEditions(basePhones) {
     const specialEditions = [];
 
-    // Select popular models for special editions
+
     const popularModels = basePhones.filter(
       (phone) =>
         phone.rating > 4.2 &&
@@ -1160,11 +1156,11 @@ class ComprehensivePhoneDataService {
     );
 
     for (const phone of popularModels.slice(0, 20)) {
-      // Create limited edition variant
+
       const specialPhone = {
         ...phone,
         name: `${phone.name} Limited Edition`,
-        price: Math.round(phone.price * 1.15), // 15% premium
+        price: Math.round(phone.price * 1.15),
         specs: {
           ...phone.specs,
           colors: [
@@ -1183,9 +1179,7 @@ class ComprehensivePhoneDataService {
     return specialEditions;
   }
 
-  /**
-   * Get storage multiplier for pricing
-   */
+
   getStorageMultiplier(storage) {
     const baseStorage = {
       "64GB": 1.0,
@@ -1198,9 +1192,7 @@ class ComprehensivePhoneDataService {
     return baseStorage[storage] || 1.0;
   }
 
-  /**
-   * Get RAM based on storage tier
-   */
+
   getRAMForStorage(storage) {
     if (storage === "1TB") return "12GB";
     if (storage === "512GB") return "12GB";
@@ -1209,9 +1201,7 @@ class ComprehensivePhoneDataService {
     return "4GB";
   }
 
-  /**
-   * Generate realistic affiliate links
-   */
+
   generateAffiliateLink(brand, model, storage) {
     const sources = [
       "amazon.in",
@@ -1227,11 +1217,9 @@ class ComprehensivePhoneDataService {
     return `https://www.${source}/dp/${slug}`;
   }
 
-  /**
-   * Get real-time market prices (simulated with realistic variations)
-   */
+
   async getMarketPrices(phoneName, brand) {
-    // Simulate market price variations
+
     const basePrice = this.getBasePriceEstimate(phoneName, brand);
 
     const prices = {
@@ -1255,12 +1243,10 @@ class ComprehensivePhoneDataService {
     return prices;
   }
 
-  /**
-   * Estimate base price for a phone
-   */
+
   getBasePriceEstimate(phoneName, brand) {
-    // Simplified price estimation based on brand and model indicators
-    let basePrice = 25000; // Default mid-range price
+
+    let basePrice = 25000;
 
     if (brand === "Apple") {
       if (phoneName.includes("Pro Max")) basePrice = 120000;
@@ -1279,7 +1265,7 @@ class ComprehensivePhoneDataService {
       else basePrice = 45000;
     }
 
-    // Adjust for storage
+
     if (phoneName.includes("1TB")) basePrice *= 1.5;
     else if (phoneName.includes("512GB")) basePrice *= 1.3;
     else if (phoneName.includes("256GB")) basePrice *= 1.15;
@@ -1287,9 +1273,7 @@ class ComprehensivePhoneDataService {
     return basePrice;
   }
 
-  /**
-   * Cache comprehensive phone data
-   */
+
   setCachedPhoneData(phones) {
     this.cache.set("comprehensive_phones", {
       data: phones,
@@ -1297,9 +1281,7 @@ class ComprehensivePhoneDataService {
     });
   }
 
-  /**
-   * Get cached comprehensive phone data
-   */
+
   getCachedPhoneData() {
     const cached = this.cache.get("comprehensive_phones");
     if (cached && Date.now() - cached.timestamp < 24 * 60 * 60 * 1000) {

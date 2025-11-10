@@ -13,13 +13,11 @@ class PriceHistoryService {
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
   }
 
-  /**
-   * Main function to get price history from multiple sources
-   */
+
   async getPriceHistoryByProduct(productName, brand, currentPrice) {
     console.log(`Getting price history for: ${brand} ${productName}`);
 
-    // Try each source in order of reliability
+
     const sources = [
       () => this.getPriceHistoryFromPriceBaba(productName, brand),
       () => this.getPriceHistoryFromMySmartPrice(productName, brand),
@@ -41,13 +39,11 @@ class PriceHistoryService {
       }
     }
 
-    // Fallback: generate realistic mock data
+
     return this.generateRealisticPriceHistory(currentPrice, productName, brand);
   }
 
-  /**
-   * Try to get price history from PriceBaba
-   */
+
   async getPriceHistoryFromPriceBaba(productName, brand) {
     try {
       const searchQuery = `${brand} ${productName}`
@@ -66,12 +62,12 @@ class PriceHistoryService {
 
       const $ = cheerio.load(response.data);
 
-      // Look for product links
+
       const productLinks = [];
       $('a[href*="/product/"]').each((i, element) => {
         const href = $(element).attr("href");
         if (href && i < 3) {
-          // Take first 3 results
+
           productLinks.push(
             href.startsWith("http") ? href : `https://pricebaba.com${href}`
           );
@@ -89,9 +85,7 @@ class PriceHistoryService {
     }
   }
 
-  /**
-   * Extract price history from PriceBaba product page
-   */
+
   async extractPriceHistoryFromPriceBaba(productUrl) {
     try {
       const response = await axios.get(productUrl, {
@@ -102,7 +96,7 @@ class PriceHistoryService {
       const $ = cheerio.load(response.data);
       const priceHistory = [];
 
-      // Look for price data in various formats
+
       $("script").each((i, element) => {
         const scriptContent = $(element).html();
         if (
@@ -110,7 +104,7 @@ class PriceHistoryService {
           scriptContent.includes("price") &&
           scriptContent.includes("date")
         ) {
-          // Try to extract price history from JSON data
+
           const matches = scriptContent.match(
             /priceHistory["\']?\s*:\s*(\[.*?\])/gi
           );
@@ -119,7 +113,7 @@ class PriceHistoryService {
               const data = JSON.parse(matches[0].split(":")[1]);
               return data;
             } catch (e) {
-              // Continue searching
+
             }
           }
         }
@@ -132,9 +126,7 @@ class PriceHistoryService {
     }
   }
 
-  /**
-   * Try to get price history from MySmartPrice
-   */
+
   async getPriceHistoryFromMySmartPrice(productName, brand) {
     try {
       const searchUrl = `https://www.mysmartprice.com/search?s=${encodeURIComponent(
@@ -150,7 +142,7 @@ class PriceHistoryService {
 
       const $ = cheerio.load(response.data);
 
-      // Look for product links
+
       const productLinks = [];
       $('a[href*="/mobile/"]').each((i, element) => {
         const href = $(element).attr("href");
@@ -174,9 +166,7 @@ class PriceHistoryService {
     }
   }
 
-  /**
-   * Extract price history from MySmartPrice product page
-   */
+
   async extractPriceHistoryFromMySmartPrice(productUrl) {
     try {
       const response = await axios.get(productUrl, {
@@ -187,11 +177,11 @@ class PriceHistoryService {
       const $ = cheerio.load(response.data);
       let priceHistory = [];
 
-      // Look for price chart data
+
       $("script").each((i, element) => {
         const scriptContent = $(element).html();
         if (scriptContent && scriptContent.includes("chartData")) {
-          // Extract chart data
+
           const chartMatches = scriptContent.match(
             /chartData["\']?\s*[=:]\s*(\[.*?\])/gi
           );
@@ -203,7 +193,7 @@ class PriceHistoryService {
                 price: item.price || item.y,
               }));
             } catch (e) {
-              // Continue
+
             }
           }
         }
@@ -216,9 +206,7 @@ class PriceHistoryService {
     }
   }
 
-  /**
-   * Try to get price history from PriceHistory.app
-   */
+
   async getPriceHistoryFromPriceHistory(productName, brand) {
     try {
       const searchUrl = `https://pricehistory.app/?search=${encodeURIComponent(
@@ -234,7 +222,7 @@ class PriceHistoryService {
 
       const $ = cheerio.load(response.data);
 
-      // Look for product links
+
       const productLinks = [];
       $('a[href*="/p/"]').each((i, element) => {
         const href = $(element).attr("href");
@@ -258,9 +246,7 @@ class PriceHistoryService {
     }
   }
 
-  /**
-   * Extract price history from PriceHistory.app product page
-   */
+
   async extractPriceHistoryFromPriceHistoryApp(productUrl) {
     try {
       const response = await axios.get(productUrl, {
@@ -271,7 +257,7 @@ class PriceHistoryService {
       const $ = cheerio.load(response.data);
       let priceHistory = [];
 
-      // Look for price data in scripts
+
       $("script").each((i, element) => {
         const scriptContent = $(element).html();
         if (
@@ -279,7 +265,7 @@ class PriceHistoryService {
           (scriptContent.includes("priceHistory") ||
             scriptContent.includes("chartData"))
         ) {
-          // Try various patterns
+
           const patterns = [
             /priceHistory["\']?\s*[=:]\s*(\[.*?\])/gi,
             /chartData["\']?\s*[=:]\s*(\[.*?\])/gi,
@@ -308,9 +294,7 @@ class PriceHistoryService {
     }
   }
 
-  /**
-   * Generate realistic price history based on current price and market trends
-   */
+
   generateRealisticPriceHistory(currentPrice, productName, brand) {
     console.log(
       `Generating realistic price history for ${brand} ${productName}`
@@ -318,9 +302,9 @@ class PriceHistoryService {
 
     const history = [];
     const today = new Date();
-    const numberOfPoints = 15; // 15 data points over 3 months
+    const numberOfPoints = 15;
 
-    // Different price patterns based on product type and brand
+
     const isApple =
       brand.toLowerCase().includes("apple") ||
       brand.toLowerCase().includes("iphone");
@@ -330,43 +314,43 @@ class PriceHistoryService {
       productName.toLowerCase().includes("2024") ||
       productName.toLowerCase().includes("2025");
 
-    let baseVariation = 0.08; // 8% base variation
-    let trendDirection = 0; // 0: stable, 1: increasing, -1: decreasing
+    let baseVariation = 0.08;
+    let trendDirection = 0;
 
-    // Apple products tend to have more stable pricing initially, then drop
+
     if (isApple) {
-      baseVariation = 0.06; // 6% variation
-      trendDirection = isNewProduct ? 0 : -0.3; // New products stable, older ones decrease
+      baseVariation = 0.06;
+      trendDirection = isNewProduct ? 0 : -0.3;
     }
 
-    // Samsung products often have more aggressive price drops
+
     if (isSamsung) {
-      baseVariation = 0.12; // 12% variation
-      trendDirection = -0.5; // Generally decreasing trend
+      baseVariation = 0.12;
+      trendDirection = -0.5;
     }
 
     for (let i = numberOfPoints - 1; i >= 0; i--) {
       const date = new Date(today);
-      date.setDate(date.getDate() - i * 7); // Weekly data points
+      date.setDate(date.getDate() - i * 7);
 
-      // Calculate price with trend and random variation
+
       const weeksFromToday = i;
       const trendEffect = trendDirection * (weeksFromToday / numberOfPoints);
       const randomVariation = (Math.random() - 0.5) * baseVariation * 2;
 
       let historicalPrice = currentPrice * (1 + trendEffect + randomVariation);
 
-      // Add some realistic price patterns
+
       if (i === numberOfPoints - 1) {
-        // Launch price might be higher
+
         historicalPrice = currentPrice * (isNewProduct ? 1.1 : 1.05);
       }
 
-      // Ensure price is reasonable
-      historicalPrice = Math.max(historicalPrice, currentPrice * 0.7); // Never below 70% of current
-      historicalPrice = Math.min(historicalPrice, currentPrice * 1.3); // Never above 130% of current
 
-      // Round to nearest reasonable value
+      historicalPrice = Math.max(historicalPrice, currentPrice * 0.7);
+      historicalPrice = Math.min(historicalPrice, currentPrice * 1.3);
+
+
       historicalPrice = Math.round(historicalPrice / 100) * 100;
 
       history.push({
@@ -376,7 +360,7 @@ class PriceHistoryService {
       });
     }
 
-    // Ensure the last price is close to the current price
+
     if (history.length > 0) {
       history[history.length - 1].price = currentPrice;
     }
@@ -384,9 +368,7 @@ class PriceHistoryService {
     return history;
   }
 
-  /**
-   * Format and validate price history data
-   */
+
   formatPriceHistory(history) {
     if (!Array.isArray(history)) return [];
 
@@ -399,12 +381,10 @@ class PriceHistoryService {
       }))
       .filter((item) => item.price > 0)
       .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(-30); // Keep last 30 data points
+      .slice(-30);
   }
 
-  /**
-   * Validate if price history data looks realistic
-   */
+
   isRealisticPriceHistory(history, currentPrice) {
     if (!history || history.length < 3) return false;
 
@@ -412,7 +392,7 @@ class PriceHistoryService {
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    // Check if variation is within reasonable bounds (30% to 200% of current price)
+
     return minPrice >= currentPrice * 0.3 && maxPrice <= currentPrice * 2;
   }
 }

@@ -18,14 +18,14 @@ export default function ComparisonScreen() {
     useComparison();
 
   const getImageUrl = (imageUrl) => {
-    // If no URL or invalid URL, use default 16pm.png
+
     if (!imageUrl || typeof imageUrl !== "string" || imageUrl.trim() === "") {
       return `${API_BASE_URL}/assets/16pm.png`;
     }
     if (imageUrl.startsWith("/assets/")) {
       return `${API_BASE_URL}${imageUrl}`;
     }
-    // For external URLs, return as-is, but if they fail to load, fallback will handle it
+
     return imageUrl;
   };
 
@@ -81,7 +81,7 @@ export default function ComparisonScreen() {
           showsHorizontalScrollIndicator={false}
         >
           <View style={styles.tableContainer}>
-            {/* Headers Row */}
+            {}
             <View style={styles.headerRow}>
               <View style={styles.labelColumn}>
                 <Text style={styles.fieldLabel}></Text>
@@ -93,8 +93,8 @@ export default function ComparisonScreen() {
                       source={{ uri: getImageUrl(item.imageUrl) }}
                       style={styles.productImage}
                       onError={() => {
-                        // If image fails to load, the getImageUrl function already provides fallback
-                        // This is mainly for external URLs that might fail
+
+
                       }}
                     />
                     <Text style={styles.productName} numberOfLines={2}>
@@ -111,7 +111,7 @@ export default function ComparisonScreen() {
               ))}
             </View>
 
-            {/* Data Rows */}
+            {}
             <View style={styles.dataRow}>
               <View style={styles.labelColumn}>
                 <Text style={styles.fieldLabel}>Brand</Text>
@@ -150,7 +150,7 @@ export default function ComparisonScreen() {
               ))}
             </View>
 
-            {/* Specifications */}
+            {}
             {comparisonList.length > 0 &&
               comparisonList[0].specs &&
               Object.keys(comparisonList[0].specs).map((specKey, index) => (

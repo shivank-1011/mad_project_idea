@@ -5,9 +5,7 @@ const phoneDataNormalizer = require("../services/phoneDataNormalizer");
 
 const router = express.Router();
 
-/**
- * Get scraper statistics and status
- */
+
 router.get("/status", async (req, res) => {
   try {
     const stats = phoneDataScheduler.getStats();
@@ -31,9 +29,7 @@ router.get("/status", async (req, res) => {
   }
 });
 
-/**
- * Manually trigger full phone data scrape
- */
+
 router.post("/scrape/full", async (req, res) => {
   try {
     if (phoneDataScheduler.getStats().isRunning) {
@@ -44,7 +40,7 @@ router.post("/scrape/full", async (req, res) => {
       });
     }
 
-    // Start the scraping process (don't wait for completion)
+
     phoneDataScheduler.triggerFullScrape().catch((error) => {
       console.error("Background scraping failed:", error);
     });
@@ -68,9 +64,7 @@ router.post("/scrape/full", async (req, res) => {
   }
 });
 
-/**
- * Manually trigger price update for existing phones
- */
+
 router.post("/scrape/prices", async (req, res) => {
   try {
     if (phoneDataScheduler.getStats().isRunning) {
@@ -81,7 +75,7 @@ router.post("/scrape/prices", async (req, res) => {
       });
     }
 
-    // Start the price update process
+
     phoneDataScheduler.triggerPriceUpdate().catch((error) => {
       console.error("Background price update failed:", error);
     });
@@ -105,23 +99,21 @@ router.post("/scrape/prices", async (req, res) => {
   }
 });
 
-/**
- * Test scraping a small sample without saving to database
- */
+
 router.post("/scrape/test", async (req, res) => {
   try {
     console.log("🧪 Testing scraper with small sample...");
 
-    // Override the maxPagesPerSource for testing
+
     const originalMaxPages = phoneScraperService.maxPagesPerSource;
     phoneScraperService.maxPagesPerSource = 1;
 
     const rawPhones = await phoneScraperService.scrapeAllPhones();
     const normalizedPhones = await phoneDataNormalizer.normalizePhones(
       rawPhones.slice(0, 10)
-    ); // Test with first 10
+    );
 
-    // Restore original setting
+
     phoneScraperService.maxPagesPerSource = originalMaxPages;
 
     res.json({
@@ -150,17 +142,15 @@ router.post("/scrape/test", async (req, res) => {
   }
 });
 
-/**
- * Get database statistics
- */
+
 router.get("/database/stats", async (req, res) => {
   try {
     const prisma = req.prisma;
 
-    // Get total phones count
+
     const totalPhones = await prisma.product.count();
 
-    // Get phones by brand
+
     const phonesByBrand = await prisma.product.groupBy({
       by: ["brand"],
       _count: true,
@@ -171,14 +161,14 @@ router.get("/database/stats", async (req, res) => {
       },
     });
 
-    // Get price statistics
+
     const priceStats = await prisma.product.aggregate({
       _min: { price: true },
       _max: { price: true },
       _avg: { price: true },
     });
 
-    // Get latest updated phones
+
     const recentlyUpdated = await prisma.product.findMany({
       select: {
         name: true,

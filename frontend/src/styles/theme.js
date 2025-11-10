@@ -1,24 +1,24 @@
-// Ultra-modern theme configuration with gradient support
+
 export const colors = {
-  // Primary colors - Modern blue/purple gradient theme
+
   primary: "#6C5CE7",
   primaryDark: "#5F3DC4",
   primaryLight: "#A29BFE",
   primaryGradient: ["#6C5CE7", "#A29BFE"],
 
-  // Secondary colors - Warm gradient
+
   secondary: "#FD79A8",
   secondaryDark: "#E84393",
   secondaryLight: "#FDCB6E",
   secondaryGradient: ["#FD79A8", "#FDCB6E"],
 
-  // Tertiary colors - Cool gradient
+
   tertiary: "#00CEC9",
   tertiaryDark: "#00B894",
   tertiaryLight: "#55EFC4",
   tertiaryGradient: ["#00CEC9", "#55EFC4"],
 
-  // Background colors - Modern layered design
+
   background: "#F8F9FF",
   backgroundSecondary: "#F1F2FF",
   surface: "#FFFFFF",
@@ -26,14 +26,14 @@ export const colors = {
   surfaceElevated: "rgba(255, 255, 255, 0.9)",
   overlay: "rgba(108, 92, 231, 0.1)",
 
-  // Text colors - Enhanced hierarchy
+
   text: "#2D3436",
   textSecondary: "#636E72",
   textTertiary: "#B2BEC3",
   textInverse: "#FFFFFF",
   textMuted: "#A0A6AC",
 
-  // Status colors - Modern and vibrant
+
   success: "#00B894",
   successLight: "#55EFC4",
   warning: "#FDCB6E",
@@ -43,27 +43,27 @@ export const colors = {
   info: "#74B9FF",
   infoLight: "#E8F4FD",
 
-  // Accent colors
+
   accent: "#FF7675",
   accentSecondary: "#A29BFE",
 
-  // Border colors
+
   border: "rgba(108, 92, 231, 0.12)",
   borderLight: "rgba(108, 92, 231, 0.06)",
   borderAccent: "rgba(108, 92, 231, 0.25)",
 
-  // Shadow colors
+
   shadow: "rgba(108, 92, 231, 0.15)",
   shadowDark: "rgba(108, 92, 231, 0.25)",
   shadowLight: "rgba(108, 92, 231, 0.08)",
 
-  // Glass morphism
+
   glass: "rgba(255, 255, 255, 0.25)",
   glassDark: "rgba(45, 52, 54, 0.25)",
 };
 
 export const typography = {
-  // Enhanced font sizes with better scaling
+
   fontSize: {
     xs: 11,
     sm: 13,
@@ -77,7 +77,7 @@ export const typography = {
     hero: 42,
   },
 
-  // Font weights - enhanced hierarchy
+
   fontWeight: {
     light: "300",
     normal: "400",
@@ -87,7 +87,7 @@ export const typography = {
     heavy: "800",
   },
 
-  // Line heights for better readability
+
   lineHeight: {
     tight: 1.15,
     snug: 1.25,
@@ -96,7 +96,7 @@ export const typography = {
     loose: 1.6,
   },
 
-  // Letter spacing for modern typography
+
   letterSpacing: {
     tighter: -0.5,
     tight: -0.25,
@@ -168,7 +168,7 @@ export const shadows = {
     shadowRadius: 16,
     elevation: 12,
   },
-  // Special shadows
+
   glow: {
     shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 0 },
@@ -185,7 +185,7 @@ export const shadows = {
   },
 };
 
-// Animation durations
+
 export const animations = {
   fast: 150,
   normal: 250,
@@ -193,7 +193,7 @@ export const animations = {
   slower: 500,
 };
 
-// Gradients helper
+
 export const gradients = {
   primary: {
     colors: colors.primaryGradient,

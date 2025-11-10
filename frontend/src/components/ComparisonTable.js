@@ -16,7 +16,7 @@ export default function ComparisonTable({ products }) {
       </Text>
     );
 
-  // Define all specification categories to compare
+
   const specCategories = [
     { key: "name", label: "Product Name", isBasic: true },
     { key: "brand", label: "Brand", isBasic: true },
@@ -53,17 +53,17 @@ export default function ComparisonTable({ products }) {
       value = product.specs?.[spec.key];
     }
 
-    // Apply custom formatting if available
+
     if (spec.format && value) {
       return spec.format(value);
     }
 
-    // Handle different value types
+
     if (value === null || value === undefined || value === "") {
       return "Not specified";
     }
 
-    // Truncate long text for better display (increased limit for better readability)
+
     if (typeof value === "string" && value.length > 150) {
       return value.substring(0, 150) + "...";
     }
@@ -85,7 +85,7 @@ export default function ComparisonTable({ products }) {
         nestedScrollEnabled={true}
       >
         <View style={styles.table}>
-          {/* Product headers row */}
+          {}
           <View style={styles.headerRow}>
             <View style={styles.specLabelColumn}>
               <Text style={styles.specLabelHeader}>Specifications</Text>
@@ -99,7 +99,7 @@ export default function ComparisonTable({ products }) {
             ))}
           </View>
 
-          {/* Specification rows */}
+          {}
           {specCategories.map((spec, specIndex) => (
             <View
               key={spec.key}

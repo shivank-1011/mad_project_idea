@@ -1,7 +1,7 @@
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 
-// Image mapping for phones to their local asset paths
+
 const phoneImages = {
   "Samsung Galaxy S25 Ultra": "/assets/phones/samsung-galaxy-s25-ultra.jpg",
   "Samsung Galaxy Z Fold 6": "/assets/phones/samsung-galaxy-z-fold6.jpg",
@@ -46,11 +46,11 @@ const phoneImages = {
 };
 
 async function main() {
-  // Clear existing data first
+
   await prisma.product.deleteMany({});
 
   const phoneData = [
-    // Samsung Galaxy Phones
+
     {
       name: "Samsung Galaxy S25 Ultra",
       brand: "Samsung",
@@ -196,7 +196,7 @@ async function main() {
       affiliateLink: "https://www.amazon.in/samsung-galaxy-a06",
     },
 
-    // Apple iPhone Models
+
     {
       name: "iPhone 15 Pro Max",
       brand: "Apple",
@@ -432,7 +432,7 @@ async function main() {
       affiliateLink: "https://www.amazon.in/apple-iphone-13",
     },
 
-    // Nothing Phones
+
     {
       name: "Nothing Phone (2)",
       brand: "Nothing",
@@ -488,7 +488,7 @@ async function main() {
       affiliateLink: "https://www.flipkart.com/nothing-phone-1",
     },
 
-    // OnePlus Phones
+
     {
       name: "OnePlus 12",
       brand: "OnePlus",
@@ -580,7 +580,7 @@ async function main() {
       affiliateLink: "https://www.amazon.in/oneplus-nord-3-5g",
     },
 
-    // Vivo Phones
+
     {
       name: "Vivo X200 Pro",
       brand: "Vivo",
@@ -726,7 +726,7 @@ async function main() {
       affiliateLink: "https://www.amazon.in/vivo-t3",
     },
 
-    // Additional Popular Brands from Amazon/Flipkart
+
     {
       name: "Xiaomi 14",
       brand: "Xiaomi",
@@ -783,7 +783,7 @@ async function main() {
     },
   ];
 
-  // Add imageUrl to each phone using the mapping
+
   const phoneDataWithImages = phoneData.map((phone) => ({
     ...phone,
     imageUrl:

@@ -1,6 +1,6 @@
 class PhoneDataNormalizer {
   constructor() {
-    // Brand name mappings to standardize variations
+
     this.brandMappings = {
       APPLE: "Apple",
       apple: "Apple",
@@ -31,7 +31,7 @@ class PhoneDataNormalizer {
       Pixel: "Google",
     };
 
-    // Common words to remove from phone names for better normalization
+
     this.stopWords = [
       "5G",
       "4G",
@@ -52,7 +52,7 @@ class PhoneDataNormalizer {
       "iOS",
     ];
 
-    // Price ranges for validation
+
     this.priceRanges = {
       budget: { min: 5000, max: 15000 },
       mid: { min: 15000, max: 40000 },
@@ -61,9 +61,7 @@ class PhoneDataNormalizer {
     };
   }
 
-  /**
-   * Normalize an array of phone data from different sources
-   */
+
   async normalizePhones(phones) {
     console.log(`🔧 Normalizing ${phones.length} phone entries...`);
 
@@ -75,7 +73,7 @@ class PhoneDataNormalizer {
         const normalizedPhone = await this.normalizePhone(phone);
 
         if (normalizedPhone && this.isValidPhone(normalizedPhone)) {
-          // Check for duplicates using normalized name + brand
+
           const key = `${normalizedPhone.brand}_${normalizedPhone.normalizedName}`;
 
           if (!duplicateTracker.has(key)) {
@@ -97,36 +95,34 @@ class PhoneDataNormalizer {
     return normalized;
   }
 
-  /**
-   * Normalize a single phone object
-   */
+
   async normalizePhone(phone) {
     if (!phone || !phone.name) {
       return null;
     }
 
-    // Normalize brand name
+
     const normalizedBrand = this.normalizeBrand(
       phone.brand || this.extractBrandFromName(phone.name)
     );
 
-    // Clean and normalize phone name
+
     const cleanName = this.cleanPhoneName(phone.name);
     const normalizedName = this.normalizePhoneName(cleanName);
 
-    // Extract and normalize specifications
+
     const specs = await this.normalizeSpecs(phone.name, phone.specs || {});
 
-    // Normalize price
+
     const normalizedPrice = this.normalizePrice(phone.price);
 
-    // Normalize rating
+
     const normalizedRating = this.normalizeRating(phone.rating);
 
-    // Validate and clean image URL
+
     const cleanImageUrl = this.validateImageUrl(phone.imageUrl);
 
-    // Generate price category
+
     const priceCategory = this.getPriceCategory(normalizedPrice);
 
     return {
@@ -141,7 +137,7 @@ class PhoneDataNormalizer {
       affiliateLink: phone.affiliateLink || "",
       source: phone.source || "unknown",
       lastUpdated: new Date(),
-      // Additional computed fields
+
       displayName: `${normalizedBrand} ${normalizedName}`,
       searchKeywords: this.generateSearchKeywords(
         normalizedBrand,
@@ -151,32 +147,26 @@ class PhoneDataNormalizer {
     };
   }
 
-  /**
-   * Clean phone name by removing unwanted characters and normalizing format
-   */
+
   cleanPhoneName(name) {
     if (!name) return "";
 
     return name
       .trim()
-      .replace(/\s+/g, " ") // Multiple spaces to single space
-      .replace(/[^\w\s\-\+\(\)]/g, " ") // Remove special characters except common ones
-      .replace(/\b(mobile|smartphone|phone)\b/gi, "") // Remove mobile/smartphone/phone words
+      .replace(/\s+/g, " ")
+      .replace(/[^\w\s\-\+\(\)]/g, " ")
+      .replace(/\b(mobile|smartphone|phone)\b/gi, "")
       .trim();
   }
 
-  /**
-   * Normalize phone name for better matching and deduplication
-   */
+
   normalizePhoneName(name) {
     if (!name) return "";
 
     return name.toLowerCase().replace(/\s+/g, "").replace(/[^\w]/g, "");
   }
 
-  /**
-   * Normalize brand name using mappings
-   */
+
   normalizeBrand(brand) {
     if (!brand) return "Unknown";
 
@@ -184,9 +174,7 @@ class PhoneDataNormalizer {
     return this.brandMappings[trimmed] || this.capitalizeFirst(trimmed);
   }
 
-  /**
-   * Extract brand from phone name if not provided
-   */
+
   extractBrandFromName(name) {
     if (!name) return "Unknown";
 
@@ -194,9 +182,7 @@ class PhoneDataNormalizer {
     return this.brandMappings[firstWord] || firstWord;
   }
 
-  /**
-   * Normalize phone specifications
-   */
+
   async normalizeSpecs(name, specs) {
     const normalized = {
       ram: this.extractRAM(name) || specs.ram || "Not specified",
@@ -212,9 +198,7 @@ class PhoneDataNormalizer {
     return normalized;
   }
 
-  /**
-   * Extract RAM information from name
-   */
+
   extractRAM(name) {
     const ramMatches = [
       /(\d+)\s*GB\s*RAM/gi,
@@ -232,9 +216,7 @@ class PhoneDataNormalizer {
     return null;
   }
 
-  /**
-   * Extract Storage information from name
-   */
+
   extractStorage(name) {
     const storageMatches = [
       /(\d+)\s*GB(?!\s*RAM)/gi,
@@ -254,9 +236,7 @@ class PhoneDataNormalizer {
     return null;
   }
 
-  /**
-   * Extract Display information from name
-   */
+
   extractDisplay(name) {
     const displayMatches = [
       /(\d+\.?\d*)\s*inch/gi,
@@ -273,9 +253,7 @@ class PhoneDataNormalizer {
     return null;
   }
 
-  /**
-   * Extract Camera information from name
-   */
+
   extractCamera(name) {
     const cameraMatches = [
       /(\d+)\s*MP/gi,
@@ -293,9 +271,7 @@ class PhoneDataNormalizer {
     return null;
   }
 
-  /**
-   * Extract Battery information from name
-   */
+
   extractBattery(name) {
     const batteryMatches = [
       /(\d+)\s*mAh/gi,
@@ -312,9 +288,7 @@ class PhoneDataNormalizer {
     return null;
   }
 
-  /**
-   * Extract Processor information from name
-   */
+
   extractProcessor(name) {
     const processors = [
       "Snapdragon",
@@ -340,9 +314,7 @@ class PhoneDataNormalizer {
     return null;
   }
 
-  /**
-   * Extract OS information from name
-   */
+
   extractOS(name) {
     if (
       name.toLowerCase().includes("iphone") ||
@@ -356,9 +328,7 @@ class PhoneDataNormalizer {
     return null;
   }
 
-  /**
-   * Normalize price (ensure it's a valid number)
-   */
+
   normalizePrice(price) {
     if (typeof price === "string") {
       const numericPrice = parseInt(price.replace(/[^\d]/g, ""));
@@ -367,18 +337,14 @@ class PhoneDataNormalizer {
     return typeof price === "number" && price > 0 ? price : 0;
   }
 
-  /**
-   * Normalize rating (ensure it's between 0 and 5)
-   */
+
   normalizeRating(rating) {
     const numericRating = parseFloat(rating);
     if (isNaN(numericRating)) return 4.0;
     return Math.max(0, Math.min(5, numericRating));
   }
 
-  /**
-   * Validate and clean image URL
-   */
+
   validateImageUrl(imageUrl) {
     if (!imageUrl || typeof imageUrl !== "string") return "";
 
@@ -390,9 +356,7 @@ class PhoneDataNormalizer {
     }
   }
 
-  /**
-   * Get price category based on price ranges
-   */
+
   getPriceCategory(price) {
     for (const [category, range] of Object.entries(this.priceRanges)) {
       if (price >= range.min && price <= range.max) {
@@ -402,9 +366,7 @@ class PhoneDataNormalizer {
     return price > 200000 ? "ultra-premium" : "unknown";
   }
 
-  /**
-   * Generate search keywords for better discoverability
-   */
+
   generateSearchKeywords(brand, name, specs) {
     const keywords = [
       brand.toLowerCase(),
@@ -421,9 +383,7 @@ class PhoneDataNormalizer {
     return keywords.join(" ");
   }
 
-  /**
-   * Validate if phone data meets minimum requirements
-   */
+
   isValidPhone(phone) {
     return (
       phone &&
@@ -438,9 +398,7 @@ class PhoneDataNormalizer {
     );
   }
 
-  /**
-   * Capitalize first letter of each word
-   */
+
   capitalizeFirst(str) {
     return str
       .toLowerCase()

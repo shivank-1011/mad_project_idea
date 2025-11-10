@@ -18,42 +18,38 @@ class PhoneDataScheduler {
       totalPhonesUpdated: 0,
     };
 
-    // Schedule jobs
+
     this.scheduleJobs();
   }
 
-  /**
-   * Schedule all background jobs
-   */
+
   scheduleJobs() {
-    // Daily full scrape at 2:00 AM
+
     cron.schedule("0 2 * * *", async () => {
       console.log("🕐 Starting scheduled daily phone data update...");
       await this.performFullScrape();
     });
 
-    // Quick price updates every 6 hours
+
     cron.schedule("0 */6 * * *", async () => {
       console.log("🕐 Starting scheduled price update...");
       await this.performPriceUpdate();
     });
 
-    // Weekly cleanup at 3:00 AM on Sundays
+
     cron.schedule("0 3 * * 0", async () => {
       console.log("🕐 Starting scheduled weekly cleanup...");
       await this.performCleanup();
     });
 
-    // Uncomment below to see scheduler details on startup
-    // console.log("📅 Phone data scheduler initialized with the following jobs:");
-    // console.log("   - Daily full scrape: 2:00 AM");
-    // console.log("   - Price updates: Every 6 hours");
-    // console.log("   - Weekly cleanup: 3:00 AM on Sundays");
+
+
+
+
+
   }
 
-  /**
-   * Perform full scrape of phone data
-   */
+
   async performFullScrape() {
     if (this.isRunning) {
       console.log("⚠️ Scraping job already running, skipping...");
@@ -67,20 +63,20 @@ class PhoneDataScheduler {
     try {
       console.log("🚀 Starting full phone data scrape...");
 
-      // Scrape all phones
+
       const rawPhones = await phoneScraperService.scrapeAllPhones();
       console.log(`📱 Scraped ${rawPhones.length} phones from all sources`);
 
-      // Normalize the data
+
       const normalizedPhones = await phoneDataNormalizer.normalizePhones(
         rawPhones
       );
       console.log(`🔧 Normalized to ${normalizedPhones.length} valid phones`);
 
-      // Save to database
+
       const result = await this.savePhonesToDatabase(normalizedPhones);
 
-      // Update statistics
+
       this.stats.totalRuns++;
       this.stats.successfulRuns++;
       this.stats.totalPhonesProcessed += normalizedPhones.length;
@@ -103,9 +99,7 @@ class PhoneDataScheduler {
     }
   }
 
-  /**
-   * Perform quick price updates for existing phones
-   */
+
   async performPriceUpdate() {
     if (this.isRunning) {
       console.log("⚠️ Job already running, skipping price update...");
@@ -118,7 +112,7 @@ class PhoneDataScheduler {
     try {
       console.log("💰 Starting price update for existing phones...");
 
-      // Get all phones from database
+
       const existingPhones = await this.prisma.product.findMany({
         select: {
           id: true,
@@ -131,7 +125,7 @@ class PhoneDataScheduler {
       console.log(`📊 Updating prices for ${existingPhones.length} phones...`);
 
       let updated = 0;
-      const batchSize = 10; // Process in batches to avoid overwhelming the servers
+      const batchSize = 10;
 
       for (let i = 0; i < existingPhones.length; i += batchSize) {
         const batch = existingPhones.slice(i, i + batchSize);
@@ -139,9 +133,9 @@ class PhoneDataScheduler {
         await Promise.all(
           batch.map(async (phone) => {
             try {
-              // This is a simplified price update - in a real scenario you'd call the real-time price service
-              // For now, we'll just add some variation to demonstrate the concept
-              const priceVariation = 1 + (Math.random() - 0.5) * 0.1; // ±5% variation
+
+
+              const priceVariation = 1 + (Math.random() - 0.5) * 0.1;
               const newPrice = Math.round(phone.price * priceVariation);
 
               await this.prisma.product.update({
@@ -152,7 +146,7 @@ class PhoneDataScheduler {
                 },
               });
 
-              // Add to price history
+
               await this.prisma.priceHistory.create({
                 data: {
                   productId: phone.id,
@@ -170,7 +164,7 @@ class PhoneDataScheduler {
           })
         );
 
-        // Small delay between batches
+
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
@@ -186,16 +180,14 @@ class PhoneDataScheduler {
     }
   }
 
-  /**
-   * Perform weekly cleanup of old data
-   */
+
   async performCleanup() {
     const startTime = Date.now();
 
     try {
       console.log("🧹 Starting weekly data cleanup...");
 
-      // Remove old price history (keep only last 30 days)
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -207,7 +199,7 @@ class PhoneDataScheduler {
         },
       });
 
-      // Remove phones with invalid data or very old entries
+
       const deletedPhones = await this.prisma.product.deleteMany({
         where: {
           OR: [
@@ -216,7 +208,7 @@ class PhoneDataScheduler {
             { brand: { equals: "" } },
             {
               updatedAt: {
-                lt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), // 90 days old
+                lt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
               },
             },
           ],
@@ -234,9 +226,7 @@ class PhoneDataScheduler {
     }
   }
 
-  /**
-   * Save normalized phones to database
-   */
+
   async savePhonesToDatabase(phones) {
     const results = {
       added: 0,
@@ -248,7 +238,7 @@ class PhoneDataScheduler {
 
     for (const phone of phones) {
       try {
-        // Check if phone already exists (by name and brand)
+
         const existingPhone = await this.prisma.product.findFirst({
           where: {
             name: phone.name,
@@ -257,7 +247,7 @@ class PhoneDataScheduler {
         });
 
         if (existingPhone) {
-          // Update existing phone
+
           await this.prisma.product.update({
             where: { id: existingPhone.id },
             data: {
@@ -270,7 +260,7 @@ class PhoneDataScheduler {
             },
           });
 
-          // Add price history if price changed
+
           if (existingPhone.price !== phone.price) {
             await this.prisma.priceHistory.create({
               data: {
@@ -282,7 +272,7 @@ class PhoneDataScheduler {
 
           results.updated++;
         } else {
-          // Create new phone
+
           const newPhone = await this.prisma.product.create({
             data: {
               name: phone.name,
@@ -295,7 +285,7 @@ class PhoneDataScheduler {
             },
           });
 
-          // Add initial price history
+
           await this.prisma.priceHistory.create({
             data: {
               productId: newPhone.id,
@@ -314,25 +304,19 @@ class PhoneDataScheduler {
     return results;
   }
 
-  /**
-   * Manually trigger a full scrape
-   */
+
   async triggerFullScrape() {
     console.log("🔄 Manual full scrape triggered...");
     await this.performFullScrape();
   }
 
-  /**
-   * Manually trigger a price update
-   */
+
   async triggerPriceUpdate() {
     console.log("🔄 Manual price update triggered...");
     await this.performPriceUpdate();
   }
 
-  /**
-   * Get scheduler statistics
-   */
+
   getStats() {
     return {
       ...this.stats,
@@ -342,9 +326,7 @@ class PhoneDataScheduler {
     };
   }
 
-  /**
-   * Format duration in human readable format
-   */
+
   formatDuration(ms) {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -359,9 +341,7 @@ class PhoneDataScheduler {
     }
   }
 
-  /**
-   * Gracefully shutdown the scheduler
-   */
+
   async shutdown() {
     console.log("🛑 Shutting down phone data scheduler...");
     await this.prisma.$disconnect();

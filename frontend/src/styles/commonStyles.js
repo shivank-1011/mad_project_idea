@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { colors, typography, spacing, borderRadius, shadows } from "./theme";
 
 export const commonStyles = StyleSheet.create({
-  // Enhanced Container styles
+
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -20,7 +20,7 @@ export const commonStyles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
 
-  // Modern Card styles
+
   card: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
@@ -41,7 +41,7 @@ export const commonStyles = StyleSheet.create({
     ...shadows.lg,
   },
 
-  // Enhanced Text styles
+
   headingLarge: {
     fontSize: typography.fontSize.heading,
     fontWeight: typography.fontWeight.bold,
@@ -92,7 +92,7 @@ export const commonStyles = StyleSheet.create({
     lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
   },
 
-  // Modern Button styles
+
   buttonPrimary: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.lg,
@@ -152,7 +152,7 @@ export const commonStyles = StyleSheet.create({
     letterSpacing: typography.letterSpacing.normal,
   },
 
-  // Layout styles
+
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -169,7 +169,7 @@ export const commonStyles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Price styles
+
   priceContainer: {
     flexDirection: "row",
     alignItems: "baseline",
@@ -189,7 +189,7 @@ export const commonStyles = StyleSheet.create({
     letterSpacing: typography.letterSpacing.tight,
   },
 
-  // Rating styles
+
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",

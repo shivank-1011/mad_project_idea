@@ -167,7 +167,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/shivankgupta/Desktop/mad_project/backend/generated/prisma",
+      "value": "/Users/shivankgupta/Desktop/mad_project_idea/backend/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -181,7 +181,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/shivankgupta/Desktop/mad_project/backend/prisma/schema.prisma",
+    "sourceFilePath": "/Users/shivankgupta/Desktop/mad_project_idea/backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -195,6 +195,7 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
+  "postinstall": true,
   "inlineDatasources": {
     "db": {
       "url": {

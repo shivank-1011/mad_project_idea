@@ -1,9 +1,9 @@
-// API Configuration
-// For React Native development - adjust the IP address for device testing
+
+
 const getBaseUrl = () => {
-  // Use localhost for web/Expo web
-  // Use 10.0.2.2 for Android emulator
-  // Use your computer's IP address for physical devices
+
+
+
   return "http://localhost:3001";
 };
 

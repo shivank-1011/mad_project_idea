@@ -8,7 +8,7 @@ async function seedFilteredData() {
   try {
     console.log("🗑️  Clearing existing data...");
 
-    // Clear existing data
+
     await prisma.priceHistory.deleteMany({});
     await prisma.product.deleteMany({});
 
@@ -21,27 +21,27 @@ async function seedFilteredData() {
         .pipe(csv())
         .on("data", (row) => {
           try {
-            // Extract brand from mobile name
+
             const mobileName = row.mobile_name || "";
             const brand = mobileName.split(" ")[0] || "";
 
-            // Skip if no valid data
+
             if (!mobileName || !brand) return;
 
-            // Parse price - remove ₹ and commas, convert to number
+
             let price = 0;
             if (row.price) {
               const priceStr = row.price.replace(/[₹,]/g, "").trim();
               price = parseFloat(priceStr) || 0;
             }
 
-            // Parse rating
+
             let rating = null;
             if (row.avg_rating && row.avg_rating !== "") {
               rating = parseFloat(row.avg_rating);
             }
 
-            // Create specs object from CSV columns
+
             const specs = {
               display: row.display || "Not specified",
               cpu: row.cpu || "Not specified",
@@ -54,7 +54,7 @@ async function seedFilteredData() {
               connectivity: row["5G|NFC|Fingerprint"] || "Not specified",
             };
 
-            // Use full expert review since column can now handle longer text
+
             let expertView = row.expert_view || null;
 
             const product = {
@@ -65,7 +65,7 @@ async function seedFilteredData() {
               rating: rating,
               totalRatings: row.total_ratings || null,
               releaseDate: row.release_date || null,
-              imageUrl: "assets/16pm.png", // Default image
+              imageUrl: "assets/16pm.png",
               expertView: expertView,
             };
 
@@ -78,13 +78,13 @@ async function seedFilteredData() {
           try {
             console.log(`📊 Found ${products.length} products to seed`);
 
-            // Get unique brands for logging
+
             const uniqueBrands = [
               ...new Set(products.map((p) => p.brand)),
             ].sort();
             console.log("🏷️  Brands to be seeded:", uniqueBrands.join(", "));
 
-            // Seed products in batches to avoid timeout
+
             const batchSize = 50;
             let seededCount = 0;
 
@@ -116,7 +116,7 @@ async function seedFilteredData() {
               `🎉 Successfully seeded ${seededCount} products from filtered dataset!`
             );
 
-            // Show final brand distribution
+
             const brandCounts = {};
             products.forEach((p) => {
               brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1;
@@ -146,7 +146,7 @@ async function seedFilteredData() {
   }
 }
 
-// Run the seed function
+
 seedFilteredData()
   .then(() => {
     console.log("✅ Database successfully updated with filtered data");

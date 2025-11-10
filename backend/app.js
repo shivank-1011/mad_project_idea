@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend server is running!" });
 });
 
-// Error handling middleware
+
 app.use((err, req, res, next) => {
   console.error("Server Error:", err);
   console.error("Stack trace:", err.stack);
@@ -35,7 +35,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });

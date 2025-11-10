@@ -8,7 +8,6 @@ class RealTimePriceService {
       flipkart: "https://www.flipkart.com",
     };
 
-    // Rotate between different user agents to avoid detection
     this.userAgents = [
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
@@ -18,18 +17,13 @@ class RealTimePriceService {
 
     this.currentUserAgent = 0;
 
-    // Cache to avoid too many requests
     this.priceCache = new Map();
-    this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+    this.cacheTimeout = 5 * 60 * 1000;
   }
 
-  /**
-   * Get real-time prices from Amazon and Flipkart
-   */
   async getRealTimePrices(productName, brand) {
     const cacheKey = `${brand}_${productName}`.toLowerCase();
 
-    // Check cache first
     if (this.priceCache.has(cacheKey)) {
       const cached = this.priceCache.get(cacheKey);
       if (Date.now() - cached.timestamp < this.cacheTimeout) {
@@ -43,7 +37,6 @@ class RealTimePriceService {
     const searchQuery = `${brand} ${productName}`.trim();
     const prices = {};
 
-    // Fetch from both sources in parallel
     const [amazonPrice, flipkartPrice] = await Promise.allSettled([
       this.getAmazonPrice(searchQuery),
       this.getFlipkartPrice(searchQuery),
@@ -57,14 +50,12 @@ class RealTimePriceService {
       prices.flipkart = flipkartPrice.value;
     }
 
-    // Use market-based pricing if scraping fails
     if (!prices.amazon && !prices.flipkart) {
       console.log("⚠️ Scraping failed, using market-based pricing data...");
       const marketPrices = await this.getFallbackPrices(searchQuery);
       Object.assign(prices, marketPrices);
     }
 
-    // Determine the cheapest price
     let cheapestPrice = null;
     let cheapestSource = null;
 
@@ -95,7 +86,6 @@ class RealTimePriceService {
       lastUpdated: new Date(),
     };
 
-    // Cache the result
     this.priceCache.set(cacheKey, {
       data: result,
       timestamp: Date.now(),
@@ -104,9 +94,6 @@ class RealTimePriceService {
     return result;
   }
 
-  /**
-   * Get headers with rotating user agent
-   */
   getHeaders() {
     const userAgent = this.userAgents[this.currentUserAgent];
     this.currentUserAgent =
@@ -117,19 +104,10 @@ class RealTimePriceService {
       Accept:
         "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
       "Accept-Language": "en-US,en;q=0.9",
-      "Accept-Encoding": "gzip, deflate, br",
-      "Cache-Control": "no-cache",
-      Pragma: "no-cache",
-      "Upgrade-Insecure-Requests": "1",
-      "Sec-Fetch-Dest": "document",
-      "Sec-Fetch-Mode": "navigate",
-      "Sec-Fetch-Site": "none",
+      Connection: "keep-alive",
     };
   }
 
-  /**
-   * Fetch price from Amazon
-   */
   async getAmazonPrice(searchQuery) {
     try {
       const searchUrl = `${this.sources.amazon}/s?k=${encodeURIComponent(
@@ -137,7 +115,6 @@ class RealTimePriceService {
       )}&ref=nb_sb_noss`;
       console.log(`🛒 Searching Amazon: ${searchUrl}`);
 
-      // Add random delay to avoid rate limiting
       await new Promise((resolve) =>
         setTimeout(resolve, Math.random() * 2000 + 1000)
       );
@@ -151,12 +128,10 @@ class RealTimePriceService {
       const $ = cheerio.load(response.data);
       console.log(`📄 Amazon page loaded, searching for products...`);
 
-      // Look for price in search results
       const prices = [];
 
-      // Updated Amazon price selectors for 2025
       $('[data-component-type="s-search-result"]').each((i, element) => {
-        if (i >= 5) return false; // Check first 5 results
+        if (i >= 5) return false;
 
         const $element = $(element);
         const title = $element
@@ -164,7 +139,6 @@ class RealTimePriceService {
           .text()
           .toLowerCase();
 
-        // Check if title contains our search terms (more flexible matching)
         const searchTerms = searchQuery.toLowerCase().split(" ");
         const matchesSearch =
           searchTerms.length >= 2
@@ -178,7 +152,6 @@ class RealTimePriceService {
             `🔍 Found matching product: ${title.substring(0, 50)}...`
           );
 
-          // Updated price selectors for current Amazon layout
           const priceSelectors = [
             ".a-price .a-offscreen",
             ".a-price-whole",
@@ -199,7 +172,6 @@ class RealTimePriceService {
               const price = this.extractPrice(priceText);
 
               if (price && price > 1000 && price < 500000) {
-                // Reasonable phone price range
                 const productUrl = $element.find("h2 a").attr("href");
                 const productTitle = $element
                   .find('h2 a span, [data-cy="title-recipe-label"]')
@@ -236,9 +208,6 @@ class RealTimePriceService {
     }
   }
 
-  /**
-   * Fetch price from Flipkart
-   */
   async getFlipkartPrice(searchQuery) {
     try {
       const searchUrl = `${this.sources.flipkart}/search?q=${encodeURIComponent(
@@ -246,7 +215,6 @@ class RealTimePriceService {
       )}`;
       console.log(`🛍️ Searching Flipkart: ${searchUrl}`);
 
-      // Add random delay to avoid rate limiting
       await new Promise((resolve) =>
         setTimeout(resolve, Math.random() * 2000 + 1000)
       );
@@ -262,7 +230,6 @@ class RealTimePriceService {
 
       const prices = [];
 
-      // Updated Flipkart selectors for 2025
       const productSelectors = [
         "[data-id]",
         "._1AtVbE",
@@ -275,11 +242,10 @@ class RealTimePriceService {
 
       for (const productSelector of productSelectors) {
         $(productSelector).each((i, element) => {
-          if (i >= 5 || productFound) return false; // Check first 5 results
+          if (i >= 5 || productFound) return false;
 
           const $element = $(element);
 
-          // Multiple ways to get title
           const title =
             $element.find("a[title]").attr("title") ||
             $element.find("._4rR01T").text() ||
@@ -303,7 +269,6 @@ class RealTimePriceService {
                 `🔍 Found matching product: ${title.substring(0, 50)}...`
               );
 
-              // Updated price selectors for current Flipkart layout
               const priceSelectors = [
                 "._30jeq3._1_WHN1",
                 "._30jeq3",
@@ -325,7 +290,6 @@ class RealTimePriceService {
                   const price = this.extractPrice(priceText);
 
                   if (price && price > 1000 && price < 500000) {
-                    // Reasonable phone price range
                     const productUrl = $element
                       .find("a[title], a")
                       .first()
@@ -343,7 +307,7 @@ class RealTimePriceService {
                       `✅ Valid Flipkart price found: ₹${price} for "${title}"`
                     );
                     productFound = true;
-                    return false; // Break out of inner loop
+                    return false;
                   }
                 }
               }
@@ -351,7 +315,7 @@ class RealTimePriceService {
           }
         });
 
-        if (productFound) break; // Break out of outer loop if we found a product
+        if (productFound) break;
       }
 
       if (prices.length > 0) {
@@ -366,14 +330,10 @@ class RealTimePriceService {
     }
   }
 
-  /**
-   * Fallback method using market data and realistic pricing
-   */
   async getFallbackPrices(searchQuery) {
     console.log("🔄 Using market-based pricing method...");
 
     try {
-      // Get prices based on real market analysis
       const prices = this.getMarketBasedPrices(searchQuery);
       return prices;
     } catch (error) {
@@ -382,13 +342,9 @@ class RealTimePriceService {
     }
   }
 
-  /**
-   * Get market-based realistic prices based on current market trends
-   */
   getMarketBasedPrices(searchQuery) {
     const query = searchQuery.toLowerCase();
 
-    // Market analysis based on actual 2025 pricing trends
     const marketData = {
       "iphone 16 pro max": { amazon: 144900, flipkart: 139900 },
       "iphone 16 pro": { amazon: 119900, flipkart: 114900 },
@@ -403,7 +359,6 @@ class RealTimePriceService {
       "nothing phone 2": { amazon: 44999, flipkart: 39999 },
     };
 
-    // Try to find exact match first
     for (const [product, prices] of Object.entries(marketData)) {
       if (query.includes(product.replace(/\s+/g, " "))) {
         return {
@@ -425,7 +380,6 @@ class RealTimePriceService {
       }
     }
 
-    // Fallback to brand-based pricing
     let basePrice = 25000;
     if (query.includes("iphone") || query.includes("apple")) {
       basePrice = query.includes("pro") ? 110000 : 70000;
@@ -447,9 +401,8 @@ class RealTimePriceService {
       basePrice = 28000;
     }
 
-    // Apply market discount patterns (Flipkart typically 5-8% cheaper)
     const amazonPrice = basePrice;
-    const flipkartPrice = Math.round(basePrice * 0.92); // 8% discount
+    const flipkartPrice = Math.round(basePrice * 0.92);
 
     return {
       amazon: {
@@ -467,29 +420,22 @@ class RealTimePriceService {
     };
   }
 
-  /**
-   * Extract numeric price from text
-   */
   extractPrice(priceText) {
     if (!priceText) return null;
 
     console.log(`🔧 Extracting price from: "${priceText}"`);
 
-    // Handle different price formats
     let cleanedPrice = priceText.toString();
 
-    // Remove common prefixes/suffixes
     cleanedPrice = cleanedPrice
       .replace(/^(from|starting|price|₹|\$|rs\.?|inr)/i, "")
       .replace(/(onwards|onward|starting|and above)$/i, "")
       .replace(/\/-/g, "")
       .trim();
 
-    // Extract numbers with commas and decimals
     const priceMatch = cleanedPrice.match(/[\d,]+(?:\.\d{1,2})?/);
 
     if (priceMatch) {
-      // Remove commas and parse as float
       const numericPrice = priceMatch[0].replace(/,/g, "");
       const price = parseFloat(numericPrice);
 
@@ -504,9 +450,6 @@ class RealTimePriceService {
     return null;
   }
 
-  /**
-   * Clear cache
-   */
   clearCache() {
     this.priceCache.clear();
   }

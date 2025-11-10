@@ -15,13 +15,13 @@ async function main() {
   );
 
   try {
-    // Clear existing data first
+
     console.log("🗑️  Clearing existing data...");
     await prisma.priceHistory.deleteMany({});
     await prisma.product.deleteMany({});
     console.log("✅ Existing data cleared\n");
 
-    // Generate comprehensive phone data
+
     console.log("🔍 Generating comprehensive phone database...");
     const rawPhones =
       await comprehensivePhoneDataService.generateComprehensivePhoneData();
@@ -37,7 +37,7 @@ async function main() {
       return;
     }
 
-    // Normalize the generated data
+
     console.log("🔧 Normalizing and cleaning phone data...");
     const normalizedPhones = await phoneDataNormalizer.normalizePhones(
       rawPhones
@@ -52,7 +52,7 @@ async function main() {
       return;
     }
 
-    // Save phones to database
+
     console.log("💾 Saving phones to database...");
     let saved = 0;
     let failed = 0;
@@ -71,7 +71,7 @@ async function main() {
           },
         });
 
-        // Add initial price history
+
         await prisma.priceHistory.create({
           data: {
             productId: createdPhone.id,
@@ -96,7 +96,7 @@ async function main() {
     console.log(`   📊 Successfully saved: ${saved} phones`);
     console.log(`   ❌ Failed to save: ${failed} phones`);
 
-    // Display brand breakdown
+
     const brandStats = await prisma.product.groupBy({
       by: ["brand"],
       _count: true,
@@ -112,7 +112,7 @@ async function main() {
       console.log(`   ${stat.brand}: ${stat._count} phones`);
     });
 
-    // Display price range stats
+
     const priceStats = await prisma.product.aggregate({
       _min: { price: true },
       _max: { price: true },
@@ -137,14 +137,12 @@ async function main() {
   }
 }
 
-/**
- * Fallback function to seed curated phone data if scraping fails
- */
+
 async function seedFallbackData() {
   console.log("📱 Seeding curated phone data as fallback...");
 
   const curatedPhones = [
-    // Premium iPhones
+
     {
       name: "iPhone 16 Pro Max",
       brand: "Apple",
@@ -179,7 +177,7 @@ async function seedFallbackData() {
       imageUrl: "/assets/phones/iphone-16-pro.jpg",
       affiliateLink: "https://www.amazon.in/dp/iPhone16Pro",
     },
-    // Samsung Galaxy Series
+
     {
       name: "Samsung Galaxy S24 Ultra",
       brand: "Samsung",
@@ -214,7 +212,7 @@ async function seedFallbackData() {
       imageUrl: "/assets/phones/samsung-galaxy-s24-plus.jpg",
       affiliateLink: "https://www.flipkart.com/samsung-galaxy-s24-plus",
     },
-    // OnePlus Phones
+
     {
       name: "OnePlus 12",
       brand: "OnePlus",
@@ -249,7 +247,7 @@ async function seedFallbackData() {
       imageUrl: "/assets/phones/oneplus-12r.jpg",
       affiliateLink: "https://www.amazon.in/dp/OnePlus12R",
     },
-    // Xiaomi Phones
+
     {
       name: "Xiaomi 14",
       brand: "Xiaomi",
@@ -267,7 +265,7 @@ async function seedFallbackData() {
       imageUrl: "/assets/phones/xiaomi-14.jpg",
       affiliateLink: "https://www.flipkart.com/xiaomi-14",
     },
-    // Nothing Phones
+
     {
       name: "Nothing Phone (2)",
       brand: "Nothing",
@@ -285,7 +283,7 @@ async function seedFallbackData() {
       imageUrl: "/assets/phones/nothing-phone-2.jpg",
       affiliateLink: "https://www.flipkart.com/nothing-phone-2",
     },
-    // Vivo Phones
+
     {
       name: "Vivo X200 Pro",
       brand: "Vivo",
@@ -330,7 +328,7 @@ async function seedFallbackData() {
         data: phone,
       });
 
-      // Add initial price history
+
       await prisma.priceHistory.create({
         data: {
           productId: createdPhone.id,

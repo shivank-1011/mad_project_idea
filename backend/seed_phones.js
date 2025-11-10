@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 async function seedPhoneData() {
   console.log("Starting phone data seed...");
 
-  // First, let's clear existing data (price history first due to foreign key)
+
   await prisma.priceHistory.deleteMany();
   await prisma.product.deleteMany();
 
@@ -20,27 +20,27 @@ async function seedPhoneData() {
     )
       .pipe(csv())
       .on("data", (data) => {
-        // Skip empty rows or rows without mobile_name
+
         if (!data.mobile_name || data.mobile_name.trim() === "") {
           return;
         }
 
-        // Extract brand from mobile name (first word before space)
+
         const brand = data.mobile_name.split(" ")[0] || "Unknown";
 
-        // Parse price (remove ₹ and commas)
+
         let price = 0;
         if (data.price && data.price.includes("₹")) {
           price = parseFloat(data.price.replace(/₹|,/g, "")) || 0;
         }
 
-        // Parse rating
+
         let rating = null;
         if (data.avg_rating && data.avg_rating !== "") {
           rating = parseFloat(data.avg_rating) || null;
         }
 
-        // Create specs object with all available data
+
         const specs = {
           cpu: data.cpu || "",
           rearCamera: data.rear_camera || "",
@@ -60,7 +60,7 @@ async function seedPhoneData() {
           totalRatings: data.total_ratings || null,
           releaseDate: data.release_date || null,
           specs: specs,
-          imageUrl: "/assets/16pm.png", // Using 16pm.png for all products as requested
+          imageUrl: "/assets/16pm.png",
           affiliateLink: null,
           expertView: data.expert_view || null,
         };
@@ -71,7 +71,7 @@ async function seedPhoneData() {
         try {
           console.log(`Parsed ${phoneData.length} phone records from CSV`);
 
-          // Insert data in batches to avoid memory issues
+
           const batchSize = 100;
           for (let i = 0; i < phoneData.length; i += batchSize) {
             const batch = phoneData.slice(i, i + batchSize);

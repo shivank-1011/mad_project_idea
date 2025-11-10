@@ -7,20 +7,18 @@ const alternativePhoneScraperService = require("./alternativePhoneScraperService
 class PhoneScraperService {
   constructor() {
     this.cache = new Map();
-    this.cacheTimeout = 24 * 60 * 60 * 1000; // 24 hours
-    this.requestDelay = 3000; // 3 seconds between requests
+    this.cacheTimeout = 24 * 60 * 60 * 1000;
+    this.requestDelay = 3000;
     this.maxRetries = 3;
-    this.maxPagesPerSource = 5; // Limit pages to scrape per source
+    this.maxPagesPerSource = 5;
   }
 
-  /**
-   * Main method to scrape phones from all sources
-   */
+
   async scrapeAllPhones() {
     console.log("🚀 Starting comprehensive phone scraping...");
 
     try {
-      // First try to get from comprehensive database
+
       console.log("� Checking comprehensive phone database...");
       const comprehensivePhones =
         await comprehensivePhoneDataService.generateComprehensivePhoneData();
@@ -32,7 +30,7 @@ class PhoneScraperService {
         return comprehensivePhones;
       }
 
-      // Fallback to scraping if comprehensive data fails
+
       console.log("🔄 Falling back to web scraping...");
       const [flipkartPhones, amazonPhones] = await Promise.allSettled([
         this.scrapeFlipkartPhones(),
@@ -55,7 +53,7 @@ class PhoneScraperService {
         console.error("❌ Amazon scraping failed:", amazonPhones.reason);
       }
 
-      // Remove duplicates and normalize data
+
       const uniquePhones = this.removeDuplicates(allPhones);
       console.log(`📱 Total unique phones found: ${uniquePhones.length}`);
 
@@ -66,9 +64,7 @@ class PhoneScraperService {
     }
   }
 
-  /**
-   * Scrape phones from Flipkart
-   */
+
   async scrapeFlipkartPhones() {
     console.log("🛒 Scraping phones from Flipkart...");
 
@@ -90,11 +86,11 @@ class PhoneScraperService {
 
       const page = await browser.newPage();
 
-      // Set user agent and viewport
+
       await page.setUserAgent(new UserAgent().toString());
       await page.setViewport({ width: 1920, height: 1080 });
 
-      // Navigate to Flipkart mobile category
+
       const flipkartUrl =
         "https://www.flipkart.com/mobiles/pr?sid=tyy%2C4io&p%5B%5D=facets.brand%255B%255D%3DSamsung&p%5B%5D=facets.brand%255B%255D%3DAPPLE&p%5B%5D=facets.brand%255B%255D%3DNothing&p%5B%5D=facets.brand%255B%255D%3DOnePlus&p%5B%5D=facets.brand%255B%255D%3Dvivo&p%5B%5D=facets.brand%255B%255D%3DXIAOMI&p%5B%5D=facets.brand%255B%255D%3Drealme&p%5B%5D=facets.brand%255B%255D%3DOPPO&otracker=categorytree";
 
@@ -104,7 +100,7 @@ class PhoneScraperService {
         timeout: 30000,
       });
 
-      // Handle login popup if it appears
+
       try {
         await page.waitForSelector('button[class*="cancel"]', {
           timeout: 5000,
@@ -115,21 +111,21 @@ class PhoneScraperService {
         console.log("ℹ️ No login popup found");
       }
 
-      // Scrape multiple pages
+
       for (let pageNum = 1; pageNum <= this.maxPagesPerSource; pageNum++) {
         console.log(`📄 Scraping Flipkart page ${pageNum}...`);
 
         try {
-          // Wait for product grid to load
+
           await page.waitForSelector("[data-id]", { timeout: 10000 });
 
-          // Extract phone data from current page
+
           const pagePhones = await page.evaluate(() => {
             const phoneElements = document.querySelectorAll("[data-id]");
             const phones = [];
 
             phoneElements.forEach((element, index) => {
-              if (index >= 20) return; // Limit per page
+              if (index >= 20) return;
 
               try {
                 const nameElement = element.querySelector(
@@ -148,32 +144,32 @@ class PhoneScraperService {
                   const name = nameElement.textContent.trim();
                   const priceText = priceElement.textContent.trim();
 
-                  // Extract brand from name
+
                   const brand = name.split(" ")[0];
 
-                  // Extract numeric price
+
                   const priceMatch = priceText.match(/₹([\d,]+)/);
                   const price = priceMatch
                     ? parseInt(priceMatch[1].replace(/,/g, ""))
                     : 0;
 
-                  // Extract rating
+
                   const ratingText = ratingElement
                     ? ratingElement.textContent.trim()
                     : "4.0";
                   const rating = parseFloat(ratingText) || 4.0;
 
-                  // Get image URL
+
                   const imageUrl = imageElement ? imageElement.src : "";
 
-                  // Get product link
+
                   const productLink = linkElement
                     ? "https://www.flipkart.com" +
                       linkElement.getAttribute("href")
                     : "";
 
                   if (price > 1000 && name.length > 5) {
-                    // Basic validation
+
                     phones.push({
                       name,
                       brand,
@@ -205,7 +201,7 @@ class PhoneScraperService {
             `📱 Found ${pagePhones.length} phones on page ${pageNum}`
           );
 
-          // Navigate to next page if it exists
+
           if (pageNum < this.maxPagesPerSource) {
             const nextButton = await page.$('a[class*="ge2uzL"]:last-child');
             if (nextButton) {
@@ -238,9 +234,7 @@ class PhoneScraperService {
     return phones;
   }
 
-  /**
-   * Scrape phones from Amazon
-   */
+
   async scrapeAmazonPhones() {
     console.log("🛒 Scraping phones from Amazon...");
 
@@ -262,11 +256,11 @@ class PhoneScraperService {
 
       const page = await browser.newPage();
 
-      // Set user agent and viewport
+
       await page.setUserAgent(new UserAgent().toString());
       await page.setViewport({ width: 1920, height: 1080 });
 
-      // Popular phone brands to search
+
       const brands = [
         "Samsung",
         "Apple",
@@ -288,13 +282,13 @@ class PhoneScraperService {
             timeout: 30000,
           });
 
-          // Wait for search results
+
           await page.waitForSelector(
             '[data-component-type="s-search-result"]',
             { timeout: 10000 }
           );
 
-          // Extract phone data
+
           const brandPhones = await page.evaluate((brandName) => {
             const phoneElements = document.querySelectorAll(
               '[data-component-type="s-search-result"]'
@@ -302,7 +296,7 @@ class PhoneScraperService {
             const phones = [];
 
             phoneElements.forEach((element, index) => {
-              if (index >= 15) return; // Limit per brand
+              if (index >= 15) return;
 
               try {
                 const nameElement = element.querySelector(
@@ -319,7 +313,7 @@ class PhoneScraperService {
                   const name = nameElement.textContent.trim();
                   const priceText = priceElement.textContent.trim();
 
-                  // Only include if it's actually a phone/mobile
+
                   if (
                     !name.toLowerCase().includes("mobile") &&
                     !name.toLowerCase().includes("phone") &&
@@ -328,32 +322,32 @@ class PhoneScraperService {
                     return;
                   }
 
-                  // Extract brand from name or use search brand
+
                   const brand = name.split(" ")[0] || brandName;
 
-                  // Extract numeric price
+
                   const priceMatch = priceText.match(/₹([\d,]+)/);
                   const price = priceMatch
                     ? parseInt(priceMatch[1].replace(/,/g, ""))
                     : 0;
 
-                  // Extract rating
+
                   const ratingText = ratingElement
                     ? ratingElement.textContent
                     : "";
                   const ratingMatch = ratingText.match(/([\d.]+) out of/);
                   const rating = ratingMatch ? parseFloat(ratingMatch[1]) : 4.0;
 
-                  // Get image URL
+
                   const imageUrl = imageElement ? imageElement.src : "";
 
-                  // Get product link
+
                   const productLink = linkElement
                     ? "https://www.amazon.in" + linkElement.getAttribute("href")
                     : "";
 
                   if (price > 1000 && name.length > 5) {
-                    // Basic validation
+
                     phones.push({
                       name,
                       brand,
@@ -388,7 +382,7 @@ class PhoneScraperService {
             `📱 Found ${brandPhones.length} ${brand} phones on Amazon`
           );
 
-          // Delay between brand searches
+
           await this.delay(this.requestDelay);
         } catch (error) {
           console.error(
@@ -408,17 +402,13 @@ class PhoneScraperService {
     return phones;
   }
 
-  /**
-   * Extract RAM from phone name
-   */
+
   extractRAM(name) {
     const ramMatch = name.match(/(\d+)\s*GB\s*RAM|(\d+)GB(?=.*RAM)/i);
     return ramMatch ? `${ramMatch[1] || ramMatch[2]}GB` : "TBD";
   }
 
-  /**
-   * Extract Storage from phone name
-   */
+
   extractStorage(name) {
     const storageMatch = name.match(/(\d+)\s*GB(?!\s*RAM)|(\d+)TB/i);
     if (storageMatch) {
@@ -429,15 +419,13 @@ class PhoneScraperService {
     return "TBD";
   }
 
-  /**
-   * Remove duplicate phones based on name similarity
-   */
+
   removeDuplicates(phones) {
     const uniquePhones = [];
     const seen = new Set();
 
     phones.forEach((phone) => {
-      // Create a normalized key for comparison
+
       const normalizedName = phone.name
         .toLowerCase()
         .replace(/\s+/g, " ")
@@ -455,16 +443,12 @@ class PhoneScraperService {
     return uniquePhones;
   }
 
-  /**
-   * Delay helper function
-   */
+
   async delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /**
-   * Get cached phone data if available
-   */
+
   getCachedData(key) {
     if (this.cache.has(key)) {
       const cached = this.cache.get(key);
@@ -476,9 +460,7 @@ class PhoneScraperService {
     return null;
   }
 
-  /**
-   * Cache phone data
-   */
+
   setCachedData(key, data) {
     this.cache.set(key, {
       data,

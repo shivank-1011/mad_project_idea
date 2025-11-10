@@ -12,14 +12,14 @@ import {
 
 export default function PhoneCard({ product, onPress }) {
   const getImage = (url) => {
-    // If no URL or invalid URL, use default 16pm.png
+
     if (!url || typeof url !== "string" || url.trim() === "") {
       return `${API_BASE_URL}/assets/16pm.png`;
     }
     if (url.startsWith("/assets/")) {
       return `${API_BASE_URL}${url}`;
     }
-    // For external URLs, return as-is, but if they fail to load, fallback will handle it
+
     return url;
   };
 
@@ -48,8 +48,8 @@ export default function PhoneCard({ product, onPress }) {
           source={{ uri: getImage(product.imageUrl) }}
           style={styles.photo}
           onError={() => {
-            // If image fails to load, the getImage function already provides fallback
-            // This is mainly for external URLs that might fail
+
+
           }}
         />
         <View style={styles.overlay} />

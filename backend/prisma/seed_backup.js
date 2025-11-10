@@ -1,7 +1,7 @@
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 
-// Image mapping for phones to their correct URLs
+
 const phoneImages = {
   "Samsung Galaxy S25 Ultra": "https://images.samsung.com/is/image/samsung/p6pim/in/2401/gallery/in-galaxy-s24-ultra-s928-sm-s928bztqins-thumb-539573190",
   "Samsung Galaxy Z Fold 6": "https://images.samsung.com/is/image/samsung/p6pim/in/2407/gallery/in-galaxy-z-fold6-f956-sm-f956bzkainu-thumb-542382265",
@@ -48,7 +48,7 @@ const phoneImages = {
 async function main() {
   await prisma.product.createMany({
     data: [
-      // Samsung Galaxy Phones
+
       {
         name: "Samsung Galaxy S25 Ultra",
         brand: "Samsung",
@@ -88,7 +88,7 @@ async function main() {
         affiliateLink: "https://www.amazon.in/samsung-galaxy-z-fold6",
       },
 
-      // Apple iPhone Models
+
       {
         name: "iPhone 15 Pro Max",
         brand: "Apple",
@@ -227,7 +227,7 @@ async function main() {
         affiliateLink: "https://www.amazon.in/apple-iphone-14-pro-max",
       },
 
-      // Vivo Phones
+
       {
         name: "Vivo X200 Pro",
         brand: "Vivo",
@@ -382,7 +382,7 @@ async function main() {
         affiliateLink: "https://www.amazon.in/vivo-t3",
       },
 
-      // Nothing Phones
+
       {
         name: "Nothing Phone (2)",
         brand: "Nothing",
@@ -441,7 +441,7 @@ async function main() {
         affiliateLink: "https://www.flipkart.com/nothing-phone-1",
       },
 
-      // OnePlus Phones
+
       {
         name: "OnePlus 12",
         brand: "OnePlus",
@@ -538,7 +538,7 @@ async function main() {
         affiliateLink: "https://www.amazon.in/oneplus-nord-3-5g",
       },
 
-      // More Samsung Phones
+
       {
         name: "Samsung Galaxy S24 Ultra",
         brand: "Samsung",
@@ -657,7 +657,7 @@ async function main() {
         affiliateLink: "https://www.amazon.in/samsung-galaxy-a06",
       },
 
-      // More iPhone Models
+
       {
         name: "iPhone 15",
         brand: "Apple",
@@ -777,7 +777,7 @@ async function main() {
         affiliateLink: "https://www.amazon.in/apple-iphone-13",
       },
 
-      // Additional Popular Brands from Amazon/Flipkart
+
       {
         name: "Xiaomi 14",
         brand: "Xiaomi",

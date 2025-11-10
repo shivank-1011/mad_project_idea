@@ -38,20 +38,20 @@ export default function ProductDetailScreen({ route }) {
   const [showZoomControls, setShowZoomControls] = useState(false);
   const { addToComparison } = useComparison();
 
-  // Construct full image URL if it's a relative path or handle external URLs
+
   const getImageUrl = (imageUrl) => {
-    // If no URL or invalid URL, use default 16pm.png
+
     if (!imageUrl || typeof imageUrl !== "string" || imageUrl.trim() === "") {
       return `${API_BASE_URL}/assets/16pm.png`;
     }
     if (imageUrl.startsWith("/assets/")) {
       return `${API_BASE_URL}${imageUrl}`;
     }
-    // For external URLs, return as-is, but if they fail to load, fallback will handle it
+
     return imageUrl;
   };
 
-  // Render specifications with user-friendly labels
+
   const renderSpecifications = (specs) => {
     const specLabels = {
       display: "Display",
@@ -119,7 +119,7 @@ export default function ProductDetailScreen({ route }) {
     );
   };
 
-  // Zoom control functions
+
   const handleZoomIn = () => {
     if (zoomLevel < 3) {
       setZoomLevel((prev) => prev + 0.5);
@@ -148,7 +148,7 @@ export default function ProductDetailScreen({ route }) {
   };
 
   const showChart = (history) => {
-    console.log("Price history data:", history); // Debug log
+    console.log("Price history data:", history);
 
     if (!history || history.length === 0) {
       return (
@@ -169,7 +169,7 @@ export default function ProductDetailScreen({ route }) {
       );
     }
 
-    // Sort history by date to ensure proper chronological order
+
     const sortedHistory = [...history].sort(
       (a, b) => new Date(a.date) - new Date(b.date)
     );
@@ -180,7 +180,7 @@ export default function ProductDetailScreen({ route }) {
     });
     const prices = sortedHistory.map((p) => p.price);
 
-    // Ensure we have valid price data
+
     if (prices.some((price) => isNaN(price) || price <= 0)) {
       return (
         <View style={styles.noDataContainer}>
@@ -196,7 +196,7 @@ export default function ProductDetailScreen({ route }) {
 
     return (
       <View style={styles.chartWrapper}>
-        {/* Zoom Controls */}
+        {}
         <View style={styles.zoomControls}>
           <TouchableOpacity
             onPress={handleZoomOut}
@@ -222,7 +222,7 @@ export default function ProductDetailScreen({ route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Chart Container with Horizontal Scroll */}
+        {}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={true}
@@ -287,7 +287,7 @@ export default function ProductDetailScreen({ route }) {
           />
         </ScrollView>
 
-        {/* Zoom Level Indicator */}
+        {}
         {zoomLevel !== 1 && (
           <View style={styles.zoomIndicator}>
             <Text style={styles.zoomIndicatorText}>
@@ -296,7 +296,7 @@ export default function ProductDetailScreen({ route }) {
           </View>
         )}
 
-        {/* Price Range Info */}
+        {}
         <View style={styles.priceRangeInfo}>
           <Text style={styles.priceRangeText}>
             Range: ₹{minPrice.toLocaleString()} - ₹{maxPrice.toLocaleString()}
@@ -321,7 +321,7 @@ export default function ProductDetailScreen({ route }) {
       </SafeAreaView>
     );
 
-  // Generate star rating display
+
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -352,8 +352,8 @@ export default function ProductDetailScreen({ route }) {
             source={{ uri: getImageUrl(item.imageUrl) }}
             style={styles.productImage}
             onError={() => {
-              // If image fails to load, the getImageUrl function already provides fallback
-              // This is mainly for external URLs that might fail
+
+
             }}
           />
         </View>
@@ -363,7 +363,7 @@ export default function ProductDetailScreen({ route }) {
             <Text style={styles.title}>{item.name}</Text>
             <Text style={styles.brand}>{item.brand}</Text>
 
-            {/* Additional phone information */}
+            {}
             <View style={styles.phoneInfoSection}>
               {item.releaseDate && (
                 <Text style={styles.phoneInfo}>📅 {item.releaseDate}</Text>
@@ -431,7 +431,7 @@ export default function ProductDetailScreen({ route }) {
             </View>
           )}
 
-          {/* Expert Review Section */}
+          {}
           {item.expertView && item.expertView.trim() !== "" && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Expert Review</Text>
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100, // Space for fixed buttons
+    paddingBottom: 100,
   },
   imageContainer: {
     backgroundColor: colors.surfaceSecondary,

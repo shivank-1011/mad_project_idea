@@ -5,11 +5,10 @@ const UserAgent = require("user-agents");
 class AlternativePhoneScraperService {
   constructor() {
     this.cache = new Map();
-    this.cacheTimeout = 12 * 60 * 60 * 1000; // 12 hours
-    this.requestDelay = 2000; // 2 seconds between requests
+    this.cacheTimeout = 12 * 60 * 60 * 1000;
+    this.requestDelay = 2000;
     this.maxRetries = 3;
 
-    // Alternative sources that are more scraping-friendly
     this.sources = {
       gsmarena: "https://www.gsmarena.com",
       pricedekho: "https://www.pricedekho.com",
@@ -25,14 +24,10 @@ class AlternativePhoneScraperService {
     ];
   }
 
-  /**
-   * Main method to scrape phones from alternative sources
-   */
   async scrapeAllPhones() {
     console.log("🚀 Starting phone scraping from alternative sources...");
 
     try {
-      // Scrape from multiple alternative sources in parallel
       const [gsmarenaPhones, smartprixPhones, mobile91Phones] =
         await Promise.allSettled([
           this.scrapeGSMArenaPhones(),
@@ -76,7 +71,6 @@ class AlternativePhoneScraperService {
         );
       }
 
-      // If all sources fail, use phone specification APIs
       if (allPhones.length === 0) {
         console.log(
           "🔄 All scraping failed, trying phone specification APIs..."
@@ -84,7 +78,6 @@ class AlternativePhoneScraperService {
         allPhones = await this.getPhoneDataFromAPIs();
       }
 
-      // Remove duplicates and clean data
       const uniquePhones = this.removeDuplicates(allPhones);
       console.log(`📱 Total unique phones found: ${uniquePhones.length}`);
 
@@ -95,15 +88,11 @@ class AlternativePhoneScraperService {
     }
   }
 
-  /**
-   * Scrape phones from GSMArena (most reliable for specs)
-   */
   async scrapeGSMArenaPhones() {
     console.log("🔍 Scraping phones from GSMArena...");
     const phones = [];
 
     try {
-      // Popular brand URLs on GSMArena
       const brandUrls = {
         Apple: "/makers.php3?idMaker=1",
         Samsung: "/makers.php3?idMaker=20",
@@ -124,9 +113,8 @@ class AlternativePhoneScraperService {
           );
           const $ = cheerio.load(response.data);
 
-          // GSMArena phone listings
           $(".makers ul li").each((i, element) => {
-            if (i >= 20) return false; // Limit to 20 phones per brand
+            if (i >= 20) return false;
 
             const $element = $(element);
             const link = $element.find("a");
@@ -134,10 +122,8 @@ class AlternativePhoneScraperService {
             const img = link.find("img");
 
             if (name && name.length > 3) {
-              // Extract basic info from the name
               const specs = this.extractSpecsFromName(name);
 
-              // Estimate price based on phone tier (GSMArena doesn't show prices)
               const estimatedPrice = this.estimatePhonePrice(name, brand);
 
               phones.push({
@@ -145,7 +131,7 @@ class AlternativePhoneScraperService {
                 brand: brand,
                 specs: specs,
                 price: estimatedPrice,
-                rating: 4.2, // Default rating
+                rating: 4.2,
                 imageUrl: img.attr("src") || "",
                 affiliateLink: `${this.sources.gsmarena}${link.attr("href")}`,
                 source: "gsmarena",
@@ -168,20 +154,16 @@ class AlternativePhoneScraperService {
     return phones;
   }
 
-  /**
-   * Scrape phones from Smartprix (Indian price comparison site)
-   */
   async scrapeSmartprixPhones() {
     console.log("🔍 Scraping phones from Smartprix...");
     const phones = [];
 
     try {
-      // Smartprix mobile categories
       const categoryUrls = [
         "/mobiles",
-        "/mobiles/filter?s%5B%5D=p_7000-15000", // Budget phones
-        "/mobiles/filter?s%5B%5D=p_15000-25000", // Mid-range phones
-        "/mobiles/filter?s%5B%5D=p_25000-50000", // Premium phones
+        "/mobiles/filter?s%5B%5D=p_7000-15000",
+        "/mobiles/filter?s%5B%5D=p_15000-25000",
+        "/mobiles/filter?s%5B%5D=p_25000-50000",
       ];
 
       for (const categoryUrl of categoryUrls) {
@@ -195,9 +177,8 @@ class AlternativePhoneScraperService {
           );
           const $ = cheerio.load(response.data);
 
-          // Smartprix phone listings
           $(".sm-product").each((i, element) => {
-            if (i >= 15) return false; // Limit per category
+            if (i >= 15) return false;
 
             const $element = $(element);
             const nameElement = $element.find(".sm-product__name");
@@ -209,10 +190,8 @@ class AlternativePhoneScraperService {
             const priceText = priceElement.text().trim();
 
             if (name && priceText) {
-              // Extract brand from name
               const brand = this.extractBrandFromName(name);
 
-              // Extract price
               const priceMatch = priceText.match(/₹([\d,]+)/);
               const price = priceMatch
                 ? parseInt(priceMatch[1].replace(/,/g, ""))
@@ -250,15 +229,11 @@ class AlternativePhoneScraperService {
     return phones;
   }
 
-  /**
-   * Scrape phones from 91mobiles
-   */
   async scrapeMobile91Phones() {
     console.log("🔍 Scraping phones from 91mobiles...");
     const phones = [];
 
     try {
-      // Search for popular phone brands on 91mobiles
       const brands = [
         "iPhone",
         "Samsung Galaxy",
@@ -279,9 +254,8 @@ class AlternativePhoneScraperService {
           const response = await this.makeRequest(searchUrl);
           const $ = cheerio.load(response.data);
 
-          // 91mobiles search results
           $(".search_result_row").each((i, element) => {
-            if (i >= 10) return false; // Limit per brand
+            if (i >= 10) return false;
 
             const $element = $(element);
             const nameElement = $element.find(".phn_name");
@@ -295,7 +269,6 @@ class AlternativePhoneScraperService {
             if (name) {
               const extractedBrand = this.extractBrandFromName(name);
 
-              // Extract price
               const priceMatch = priceText.match(/₹([\d,]+)/);
               const price = priceMatch
                 ? parseInt(priceMatch[1].replace(/,/g, ""))
@@ -331,17 +304,12 @@ class AlternativePhoneScraperService {
     return phones;
   }
 
-  /**
-   * Get phone data from public APIs when scraping fails
-   */
   async getPhoneDataFromAPIs() {
     console.log("🔌 Fetching phone data from APIs...");
     const phones = [];
 
     try {
-      // Use curated phone data as last resort
       const phoneModels = [
-        // Latest iPhones
         { name: "iPhone 16 Pro Max", brand: "Apple", basePrice: 144900 },
         { name: "iPhone 16 Pro", brand: "Apple", basePrice: 119900 },
         { name: "iPhone 16 Plus", brand: "Apple", basePrice: 89900 },
@@ -349,7 +317,6 @@ class AlternativePhoneScraperService {
         { name: "iPhone 15 Pro Max", brand: "Apple", basePrice: 134900 },
         { name: "iPhone 15 Pro", brand: "Apple", basePrice: 109900 },
 
-        // Samsung Galaxy Series
         {
           name: "Samsung Galaxy S24 Ultra",
           brand: "Samsung",
@@ -370,28 +337,24 @@ class AlternativePhoneScraperService {
           basePrice: 109999,
         },
 
-        // OnePlus phones
         { name: "OnePlus 12", brand: "OnePlus", basePrice: 64999 },
         { name: "OnePlus 12R", brand: "OnePlus", basePrice: 39999 },
         { name: "OnePlus 11 5G", brand: "OnePlus", basePrice: 56999 },
         { name: "OnePlus Nord CE 4", brand: "OnePlus", basePrice: 24999 },
         { name: "OnePlus Nord 3 5G", brand: "OnePlus", basePrice: 33999 },
 
-        // Xiaomi phones
         { name: "Xiaomi 14", brand: "Xiaomi", basePrice: 69999 },
         { name: "Xiaomi 14 Ultra", brand: "Xiaomi", basePrice: 99999 },
         { name: "Redmi Note 13 Pro+", brand: "Xiaomi", basePrice: 31999 },
         { name: "Redmi Note 13 Pro", brand: "Xiaomi", basePrice: 25999 },
         { name: "Redmi Note 13", brand: "Xiaomi", basePrice: 17999 },
 
-        // Vivo phones
         { name: "Vivo X200 Pro", brand: "Vivo", basePrice: 94999 },
         { name: "Vivo V40 Pro", brand: "Vivo", basePrice: 49999 },
         { name: "Vivo V40", brand: "Vivo", basePrice: 34999 },
         { name: "Vivo T3 Pro 5G", brand: "Vivo", basePrice: 24999 },
         { name: "Vivo T3 5G", brand: "Vivo", basePrice: 19999 },
 
-        // Other brands
         { name: "Nothing Phone (2)", brand: "Nothing", basePrice: 44999 },
         { name: "Nothing Phone (2a)", brand: "Nothing", basePrice: 25999 },
         { name: "Realme GT 6", brand: "Realme", basePrice: 40999 },
@@ -401,8 +364,7 @@ class AlternativePhoneScraperService {
       ];
 
       phoneModels.forEach((phone) => {
-        // Add some price variation to make it realistic
-        const priceVariation = 1 + (Math.random() - 0.5) * 0.1; // ±5% variation
+        const priceVariation = 1 + (Math.random() - 0.5) * 0.1;
         const currentPrice = Math.round(phone.basePrice * priceVariation);
 
         phones.push({
@@ -410,7 +372,7 @@ class AlternativePhoneScraperService {
           brand: phone.brand,
           specs: this.generatePhoneSpecs(phone.name, phone.brand),
           price: currentPrice,
-          rating: 4.0 + Math.random() * 0.8, // Random rating between 4.0-4.8
+          rating: 4.0 + Math.random() * 0.8,
           imageUrl: `/assets/phones/${phone.name
             .toLowerCase()
             .replace(/\s+/g, "-")}.jpg`,
@@ -429,9 +391,6 @@ class AlternativePhoneScraperService {
     return phones;
   }
 
-  /**
-   * Generate realistic phone specifications based on name and brand
-   */
   generatePhoneSpecs(name, brand) {
     const specs = {
       ram: "Not specified",
@@ -443,7 +402,6 @@ class AlternativePhoneScraperService {
       os: brand === "Apple" ? "iOS" : "Android",
     };
 
-    // RAM inference
     if (name.includes("Pro") || name.includes("Ultra")) {
       specs.ram = Math.random() > 0.5 ? "12GB" : "16GB";
     } else if (name.includes("Plus") || name.includes("Max")) {
@@ -452,12 +410,10 @@ class AlternativePhoneScraperService {
       specs.ram = Math.random() > 0.5 ? "6GB" : "8GB";
     }
 
-    // Storage inference
     const storageOptions = ["128GB", "256GB", "512GB", "1TB"];
     specs.storage =
       storageOptions[Math.floor(Math.random() * storageOptions.length)];
 
-    // Display size inference
     if (
       name.includes("Max") ||
       name.includes("Ultra") ||
@@ -470,7 +426,6 @@ class AlternativePhoneScraperService {
       specs.display = "6.1-6.4 inch";
     }
 
-    // Camera inference
     if (brand === "Apple") {
       specs.camera = name.includes("Pro") ? "48MP Triple" : "48MP Dual";
     } else {
@@ -484,7 +439,6 @@ class AlternativePhoneScraperService {
         cameraOptions[Math.floor(Math.random() * cameraOptions.length)];
     }
 
-    // Battery inference
     if (name.includes("Max") || name.includes("Ultra")) {
       specs.battery = "5000-6000mAh";
     } else if (name.includes("Pro") || name.includes("Plus")) {
@@ -493,7 +447,6 @@ class AlternativePhoneScraperService {
       specs.battery = "3000-4500mAh";
     }
 
-    // Processor inference
     if (brand === "Apple") {
       specs.processor = name.includes("16")
         ? "A18 Pro"
@@ -518,9 +471,6 @@ class AlternativePhoneScraperService {
     return specs;
   }
 
-  /**
-   * Extract phone specifications from name
-   */
   extractSpecsFromName(name) {
     const specs = {
       ram: this.extractRAM(name) || "Not specified",
@@ -535,9 +485,6 @@ class AlternativePhoneScraperService {
     return specs;
   }
 
-  /**
-   * Extract brand from phone name
-   */
   extractBrandFromName(name) {
     const brandMappings = {
       iPhone: "Apple",
@@ -556,13 +503,9 @@ class AlternativePhoneScraperService {
     return brandMappings[firstWord] || firstWord;
   }
 
-  /**
-   * Estimate phone price based on name and brand (for sources without prices)
-   */
   estimatePhonePrice(name, brand) {
-    let basePrice = 25000; // Default mid-range price
+    let basePrice = 25000;
 
-    // Brand-based pricing
     if (brand === "Apple") {
       basePrice = name.includes("Pro Max")
         ? 140000
@@ -591,12 +534,10 @@ class AlternativePhoneScraperService {
         : 20000;
     }
 
-    // Add some realistic variation (±10%)
     const variation = 1 + (Math.random() - 0.5) * 0.2;
     return Math.round(basePrice * variation);
   }
 
-  // Utility methods for spec extraction (same as before)
   extractRAM(name) {
     const ramMatch = name.match(/(\d+)\s*GB\s*RAM|(\d+)GB(?=.*RAM)/i);
     return ramMatch ? `${ramMatch[1] || ramMatch[2]}GB` : null;
@@ -648,9 +589,6 @@ class AlternativePhoneScraperService {
     return null;
   }
 
-  /**
-   * Remove duplicate phones
-   */
   removeDuplicates(phones) {
     const uniquePhones = [];
     const seen = new Set();
@@ -673,31 +611,20 @@ class AlternativePhoneScraperService {
     return uniquePhones;
   }
 
-  /**
-   * Make HTTP request with proper headers
-   */
   async makeRequest(url) {
     const headers = {
       "User-Agent":
         this.userAgents[Math.floor(Math.random() * this.userAgents.length)],
       Accept:
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
       "Accept-Language": "en-US,en;q=0.9",
-      "Accept-Encoding": "gzip, deflate, br",
-      "Cache-Control": "no-cache",
-      Pragma: "no-cache",
+      Connection: "keep-alive",
     };
 
-    return axios.get(url, {
-      headers,
-      timeout: 15000,
-      maxRedirects: 3,
-    });
+    // return headers to be used by request callers
+    return headers;
   }
 
-  /**
-   * Delay helper
-   */
   async delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
