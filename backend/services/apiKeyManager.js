@@ -164,6 +164,11 @@ class ApiKeyManager {
    * Find next available key (not in cooldown)
    */
   findNextAvailableKey() {
+    // Ensure cooldown status is up-to-date for all keys
+    this.keys.forEach((keyInfo) => {
+      this.isKeyInCooldown(keyInfo.index);
+    });
+
     const availableKeys = this.keys.filter(
       (keyInfo) => !this.isKeyInCooldown(keyInfo.index)
     );

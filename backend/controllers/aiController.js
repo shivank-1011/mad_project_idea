@@ -18,20 +18,37 @@ if (!apiKeyManager.hasKeys()) {
 
 // Helper function to format phone data for AI
 function formatPhoneForAI(phone) {
+  // Check if phone name already includes brand to avoid duplication
+  const phoneNameLower = phone.name.toLowerCase();
+  const brandLower = phone.brand.toLowerCase();
+  const fullName = phoneNameLower.startsWith(brandLower)
+    ? phone.name // Already has brand, use as-is
+    : `${phone.brand} ${phone.name}`; // Add brand prefix
+
   return {
-    name: `${phone.brand} ${phone.name}`,
+    name: fullName,
     brand: phone.brand,
     price: `₹${phone.price}`,
     rating: phone.rating || "N/A",
     specs: {
-      display: phone.specs.display || "Not specified",
-      cpu: phone.specs.cpu || "Not specified",
-      rearCamera: phone.specs.rearCamera || "Not specified",
-      frontCamera: phone.specs.frontCamera || "Not specified",
-      ramAndStorage: phone.specs.ramAndStorage || "Not specified",
-      battery: phone.specs.batteryAndCharging || "Not specified",
-      os: phone.specs.operatingSystem || "Not specified",
+      display: phone.specs?.display || "Not specified",
+      processor: phone.specs?.processor || phone.specs?.cpu || "Not specified",
+      rearCamera:
+        phone.specs?.camera || phone.specs?.rearCamera || "Not specified",
+      frontCamera: phone.specs?.frontCamera || "Not specified",
+      ram: phone.specs?.ram || phone.specs?.ramAndStorage || "Not specified",
+      storage: phone.specs?.storage || "Not specified",
+      battery:
+        phone.specs?.battery ||
+        phone.specs?.batteryAndCharging ||
+        "Not specified",
+      os: phone.specs?.os || phone.specs?.operatingSystem || "Not specified",
+      connectivity: phone.specs?.connectivity || "Not specified",
+      build: phone.specs?.build || "Not specified",
+      sensors: phone.specs?.sensors || "Not specified",
     },
+    releaseDate: phone.releaseDate || "Not specified",
+    totalRatings: phone.totalRatings || "No ratings",
     expertView: phone.expertView || "No expert review available",
   };
 }
@@ -185,13 +202,671 @@ exports.getRecommendation = async (req, res) => {
   try {
     console.log("🤖 AI Recommendation request:", query);
 
+    // Check if this is a detail query first to optimize phone fetching
+    const isDetailQueryCheck =
+      /\b(detail|details|info|information|spec|specs|specification|specifications|tell me about|show me|what is|what's|show the)\b/i.test(
+        query
+      ) &&
+      !/\b(recommend|suggest|compare|best|vs|versus|under|budget|better|which)\b/i.test(
+        query
+      );
+
+    // For detail queries, try to extract brand name from query to filter phones
+    let brandFilter = null;
+    if (isDetailQueryCheck) {
+      const queryLower = query.toLowerCase();
+
+      // Brand mapping - some sub-brands are stored under parent brand in DB
+      const brandMapping = {
+        iphone: "apple",
+        pixel: "google",
+        redmi: "xiaomi", // Redmi is stored as Xiaomi brand
+        poco: "xiaomi", // Poco is stored as Xiaomi brand
+        moto: "motorola",
+      };
+
+      const commonBrands = [
+        "samsung",
+        "apple",
+        "iphone",
+        "oneplus",
+        "xiaomi",
+        "redmi",
+        "poco",
+        "realme",
+        "vivo",
+        "oppo",
+        "google",
+        "pixel",
+        "motorola",
+        "moto",
+        "nokia",
+        "asus",
+        "nothing",
+        "infinix",
+        "tecno",
+      ];
+
+      for (const brand of commonBrands) {
+        if (queryLower.includes(brand)) {
+          // Use mapping if exists, otherwise use brand as-is
+          brandFilter = brandMapping[brand] || brand;
+          break;
+        }
+      }
+    }
+
+    // Extract model identifier from query for database filtering
+    // This should be more flexible - extract key model numbers/names
+    let modelFilter = null;
+    if (isDetailQueryCheck) {
+      const queryLower = query.toLowerCase();
+      // Remove common words but keep brand and model
+      const cleanedQuery = queryLower
+        .replace(
+          /\b(show|tell|give|display|what are|what's|details?|info|information|specs?|specifications?|me|about|of|for|on|the|phone)\b/gi,
+          ""
+        )
+        .replace(/\s+/g, " ")
+        .trim();
+
+      // Extract key model identifier with improved pattern
+      // Handle special model series: fold, flip, find, note, edge, reno, etc.
+      // Examples: "s24", "fold 6", "flip 5", "note 13", "iphone 15", "x6", "edge 50", "find x8"
+      const modelMatch = cleanedQuery.match(
+        /\b(?:fold|flip|find|note|edge|reno|mix|redmi|poco|x|f|v|a|m|y|s|p|galaxy|iphone|pixel)?\s*\d+[a-z]*(?:\s*(?:pro|max|ultra|plus|lite|mini|r|se|fe|ce|t|e|z|neo|turbo|prime|ace|gt))*\b/i
+      );
+      if (modelMatch) {
+        modelFilter = modelMatch[0].trim();
+      }
+    }
+
     // Fetch available phones from database
+    // For detail queries: filter by brand AND model for precise matching
+    // For recommendation queries: sort by rating for quality recommendations
+
+    // Create flexible model filter to handle spacing variations
+    // e.g., "fold 6" should match both "Fold6" and "Fold 6"
+    let modelFilterConditions = [];
+    if (modelFilter) {
+      // Original with spaces
+      modelFilterConditions.push({ name: { contains: modelFilter } });
+      // Without spaces (e.g., "fold6" from "fold 6")
+      const noSpaceModel = modelFilter.replace(/\s+/g, "");
+      if (noSpaceModel !== modelFilter) {
+        modelFilterConditions.push({ name: { contains: noSpaceModel } });
+      }
+    }
+
     const phones = await prisma.product.findMany({
-      orderBy: [{ rating: "desc" }, { price: "asc" }],
-      take: 100, // Increased to 100 for better selection
+      where:
+        isDetailQueryCheck && (brandFilter || modelFilter)
+          ? {
+              AND: [
+                brandFilter ? { brand: { contains: brandFilter } } : {},
+                modelFilterConditions.length > 0
+                  ? { OR: modelFilterConditions }
+                  : {},
+              ].filter((condition) => Object.keys(condition).length > 0),
+            }
+          : undefined,
+      orderBy: isDetailQueryCheck
+        ? [{ rating: "desc" }, { name: "asc" }] // For detail queries: sort by rating then name
+        : [{ rating: "desc" }, { price: "asc" }], // For recommendations: sort by quality
+      take: 500, // Fetch enough phones for recommendations, or all matching phones for detail queries
     });
 
-    console.log(`📱 Found ${phones.length} phones in database`);
+    console.log(
+      `📱 Found ${phones.length} phones in database${
+        brandFilter ? ` (brand: ${brandFilter})` : ""
+      }${modelFilter ? ` (model: "${modelFilter}")` : ""}`
+    );
+
+    // ==================== NEW: DETECT SPECIFIC PHONE DETAIL QUERIES ====================
+    // Check if user is asking for details of a specific phone
+    const detailQueryPattern =
+      /(?:show|tell|give|display|what are|what's|details?|info|information|specs?|specifications?)\s+(?:me|about|of|for|on)?\s*(?:the)?\s*([a-z0-9\s\+]+?)(?:\s*phone)?(?:\?|$)/i;
+    const isDetailQuery =
+      /\b(detail|details|info|information|spec|specs|specification|specifications|tell me about|show me|what is|what's|show the)\b/i.test(
+        query
+      ) &&
+      !/\b(recommend|suggest|compare|best|vs|versus|under|budget|better|which)\b/i.test(
+        query
+      );
+
+    console.log(`🔍 Query: "${query}"`);
+    console.log(`🔍 Is detail query: ${isDetailQuery}`);
+    console.log(
+      `🔍 Has detail keywords: ${/\b(detail|details|info|information|spec|specs|specification|specifications|tell me about|show me|what is|what's|show the)\b/i.test(
+        query
+      )}`
+    );
+    console.log(
+      `🔍 Has exclusion keywords: ${/\b(recommend|suggest|compare|best|vs|versus|under|budget|better|which)\b/i.test(
+        query
+      )}`
+    );
+
+    if (isDetailQuery) {
+      console.log("🔍 Detected specific phone detail query");
+
+      // Extract phone name/model from query
+      const queryLower = query.toLowerCase();
+
+      // Remove common words from query to extract phone name
+      const cleanQuery = queryLower
+        .replace(
+          /\b(show|tell|give|display|what are|what's|details?|info|information|specs?|specifications?|me|about|of|for|on|the|phone)\b/gi,
+          ""
+        )
+        .replace(/\s+/g, " ")
+        .trim();
+
+      console.log(`🔍 Searching for: "${cleanQuery}"`);
+
+      // Try to find the phone in database with improved matching
+      let foundPhone = null;
+      const queryTokens = cleanQuery.split(/\s+/).filter((t) => t.length > 0);
+
+      console.log(`🔍 Query tokens: [${queryTokens.join(", ")}]`);
+
+      // Check if we have S24 phones in our dataset
+      const s24Phones = phones.filter((p) =>
+        p.name.toLowerCase().includes("s24")
+      );
+      if (s24Phones.length > 0) {
+        console.log(`📱 Found ${s24Phones.length} S24 phones in dataset:`);
+        s24Phones.slice(0, 3).forEach((p) => {
+          console.log(`   - ${p.brand} ${p.name} (rating: ${p.rating})`);
+        });
+      }
+
+      // Score each phone and pick the best match
+      let bestMatch = null;
+      let bestScore = 0;
+      const scoredPhones = []; // Track all scores for debugging
+
+      for (const p of phones) {
+        // Handle duplicate brand names in database (e.g., "Samsung Samsung Galaxy S24")
+        let modelName = p.name.toLowerCase();
+        const brandName = p.brand.toLowerCase();
+
+        // Remove leading brand name from model name if present (handles "Samsung Samsung Galaxy")
+        if (modelName.startsWith(brandName + " ")) {
+          modelName = modelName.substring(brandName.length + 1);
+        }
+
+        const fullName = `${brandName} ${modelName}`.toLowerCase();
+        let score = 0;
+
+        // Remove common filler words from model name for better matching
+        // Also handle Xiaomi sub-brands (Redmi, Poco) that appear in model name
+        const cleanModelName = modelName
+          .replace(/\bgalaxy\b/gi, "")
+          .replace(/\bphone\b/gi, "")
+          .replace(/\bmobile\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        // For Xiaomi brand, the model name might include "Redmi" or "POCO"
+        // We want to match "redmi note 13" with "Xiaomi Redmi Note 13"
+        // Create a clean full name that includes sub-brand if present
+        let cleanFullName = `${brandName} ${cleanModelName}`.toLowerCase();
+
+        // Also create version without Xiaomi prefix for Redmi/Poco searches
+        let alternativeName = cleanModelName;
+        if (
+          brandName === "xiaomi" &&
+          (cleanModelName.includes("redmi") || cleanModelName.includes("poco"))
+        ) {
+          // For "Xiaomi Redmi Note 13", alternativeName becomes "redmi note 13"
+          alternativeName = cleanModelName; // Already has redmi/poco in it
+        }
+
+        // Exact match gets highest priority
+        if (
+          cleanFullName === cleanQuery ||
+          cleanModelName === cleanQuery ||
+          alternativeName === cleanQuery
+        ) {
+          score = 1000;
+        }
+        // Contains full query (perfect substring match)
+        else if (
+          cleanFullName.includes(cleanQuery) ||
+          cleanModelName.includes(cleanQuery) ||
+          alternativeName.includes(cleanQuery)
+        ) {
+          // Bonus if query is a significant part of the name
+          const queryLength = cleanQuery.length;
+          const nameLength = Math.max(fullName.length, modelName.length);
+          const coverage = queryLength / nameLength;
+          score = 500 + Math.floor(coverage * 200); // 500-700 range
+        }
+        // Advanced token matching
+        else {
+          // Normalize for matching (remove spaces, handle iPhone variations)
+          const normalizedQuery = cleanQuery
+            .replace(/i\s*phone\s*/i, "iphone")
+            .replace(/\s+/g, "");
+          const normalizedFullName = fullName
+            .replace(/i\s*phone\s*/i, "iphone")
+            .replace(/\s+/g, "");
+          const normalizedModel = modelName
+            .replace(/i\s*phone\s*/i, "iphone")
+            .replace(/\s+/g, "");
+
+          // Normalized string matching
+          if (
+            normalizedFullName.includes(normalizedQuery) ||
+            normalizedModel.includes(normalizedQuery)
+          ) {
+            score = 300;
+          }
+
+          // Token-by-token matching with strict requirements
+          const nameTokens = cleanModelName
+            .split(/\s+/)
+            .filter((t) => t.length > 0);
+          let matchedTokens = 0;
+          let exactMatches = 0;
+          let partialMatches = 0;
+
+          for (const qt of queryTokens) {
+            let tokenMatched = false;
+
+            for (const nt of nameTokens) {
+              // Exact token match (case-insensitive)
+              if (nt === qt) {
+                exactMatches++;
+                matchedTokens++;
+                tokenMatched = true;
+                break;
+              }
+              // For alphanumeric tokens (like a35, m35, s24), require exact match or very close match
+              else if (/^[a-z]\d+/.test(qt) || /^\d+[a-z]/.test(qt)) {
+                // Model number like "a35", "s24", "14pro" - must match exactly
+                if (
+                  nt === qt ||
+                  nt.includes(qt + " ") ||
+                  (" " + nt).includes(" " + qt)
+                ) {
+                  exactMatches++;
+                  matchedTokens++;
+                  tokenMatched = true;
+                  break;
+                }
+              }
+              // One contains the other (for regular tokens)
+              else if (nt.includes(qt)) {
+                // Prefer matches where query token is significant part of name token
+                if (qt.length >= 2 && qt.length >= nt.length * 0.5) {
+                  partialMatches++;
+                  matchedTokens++;
+                  tokenMatched = true;
+                  break;
+                }
+              } else if (qt.includes(nt) && nt.length >= 2) {
+                partialMatches++;
+                matchedTokens++;
+                tokenMatched = true;
+                break;
+              }
+            }
+
+            // Check brand match
+            if (!tokenMatched && brandName.includes(qt)) {
+              matchedTokens++;
+            }
+          }
+
+          // Calculate score based on matches
+          // Require ALL tokens to match for a valid score
+          if (matchedTokens >= queryTokens.length) {
+            score = exactMatches * 25 + partialMatches * 15;
+
+            // Bonus for brand match
+            if (
+              queryTokens.some(
+                (qt) => brandName.includes(qt) || brandName === qt
+              )
+            ) {
+              score += 30;
+            }
+
+            // Penalty if name has many extra tokens (less specific match)
+            const extraTokens = nameTokens.length - matchedTokens;
+            if (extraTokens > 2) {
+              score -= extraTokens * 5;
+            }
+          } else {
+            score = 0; // Not all tokens matched, invalid
+          }
+        }
+
+        // ==================== VARIANT PENALTY SYSTEM ====================
+        // Apply variant penalties to ALL matches (substring, token-based, etc.)
+        // This ensures base models always rank higher when variant not specified
+
+        if (score > 0) {
+          // Only apply if phone scored at all
+          const queryLowerForVariant = cleanQuery.toLowerCase();
+          const modelLowerForVariant = modelName.toLowerCase();
+
+          // Universal variant keywords (apply to all brands)
+          const universalVariants = [
+            "ultra",
+            "pro",
+            "max",
+            "plus",
+            "lite",
+            "mini",
+            "se",
+            "edge",
+            "neo",
+            "turbo",
+            "prime",
+            "pro+",
+            "proplus",
+          ];
+
+          // Brand-specific variant patterns
+          const brandVariants = {
+            samsung: ["fe", "note", "edge", "fold", "flip"],
+            apple: ["pro max", "promax", "pro", "max", "plus", "mini", "se"],
+            oneplus: ["r", "t", "ce", "nord", "ace"],
+            xiaomi: ["pro+", "pro", "turbo", "poco", "k\\d+", "note", "redmi"],
+            redmi: ["pro+", "pro", "turbo", "note", "poco", "k\\d+"],
+            poco: ["pro", "x\\d+", "f\\d+", "m\\d+", "c\\d+"],
+            realme: ["pro+", "pro", "gt", "narzo", "c\\d+"],
+            vivo: [
+              "pro+",
+              "pro",
+              "e",
+              "t\\d+",
+              "v\\d+",
+              "x\\d+",
+              "y\\d+",
+              "z\\d+",
+            ],
+            oppo: ["pro+", "pro", "plus", "find", "reno", "f\\d+", "a\\d+"],
+            motorola: ["edge", "plus", "power", "fusion", "one"],
+            google: ["pro", "xl", "a"],
+            pixel: ["pro", "xl", "a"],
+            asus: ["pro", "ultimate", "rog", "zenfone"],
+            nothing: ["plus", "pro"],
+            infinix: ["pro", "x", "zero", "hot", "smart"],
+            tecno: ["pro", "plus", "phantom", "pova", "spark", "camon"],
+          };
+
+          // Get brand-specific variants
+          const brand = p.brand.toLowerCase();
+          const brandSpecificVariants = brandVariants[brand] || [];
+
+          // Combine all variant keywords for this brand
+          const allVariants = [...universalVariants, ...brandSpecificVariants];
+
+          // Check if phone has ANY variant keyword
+          let phoneHasVariant = false;
+          let matchedVariant = null;
+
+          for (const variant of allVariants) {
+            if (variant.includes("\\d")) {
+              const regex = new RegExp(`\\b${variant}\\b`, "i");
+              if (regex.test(modelLowerForVariant)) {
+                phoneHasVariant = true;
+                matchedVariant = variant;
+                break;
+              }
+            } else {
+              const variantRegex = new RegExp(`\\b${variant}\\b`, "i");
+              if (variantRegex.test(modelLowerForVariant)) {
+                phoneHasVariant = true;
+                matchedVariant = variant;
+                break;
+              }
+            }
+          }
+
+          // Check if query mentions the variant
+          let queryHasVariant = false;
+          if (matchedVariant) {
+            if (matchedVariant.includes("\\d")) {
+              const regex = new RegExp(`\\b${matchedVariant}\\b`, "i");
+              queryHasVariant = regex.test(queryLowerForVariant);
+            } else {
+              const variantRegex = new RegExp(`\\b${matchedVariant}\\b`, "i");
+              queryHasVariant = variantRegex.test(queryLowerForVariant);
+            }
+          }
+
+          // Apply heavy penalty if phone has variant but query doesn't
+          if (phoneHasVariant && !queryHasVariant) {
+            const oldScore = score;
+            score -= 100;
+
+            // Debug: Log penalty application
+            if (
+              p.name.toLowerCase().includes("s24") ||
+              p.name.toLowerCase().includes("13")
+            ) {
+              console.log(`   📉 Variant penalty: ${p.name}`);
+              console.log(
+                `      Variant: "${matchedVariant}", Score: ${oldScore} → ${score}`
+              );
+            }
+
+            // Extra penalty for compound variants
+            if (
+              modelLowerForVariant.includes("pro max") ||
+              modelLowerForVariant.includes("pro+") ||
+              modelLowerForVariant.includes("promax") ||
+              modelLowerForVariant.includes("ultra")
+            ) {
+              score -= 50;
+            }
+          }
+
+          // Bonus if query explicitly mentions the variant
+          if (phoneHasVariant && queryHasVariant && matchedVariant) {
+            score += 50;
+          }
+
+          // Storage variant penalty
+          const phoneHasStorage =
+            /\b(64|128|256|512|1024|1|2)\s*(gb|tb)\b/i.test(modelName);
+          const queryHasStorage =
+            /\b(64|128|256|512|1024|1|2)\s*(gb|tb)\b/i.test(cleanQuery);
+
+          if (phoneHasStorage && !queryHasStorage) {
+            score -= 20;
+          }
+
+          // Color variant penalty
+          const colorKeywords = [
+            "black",
+            "white",
+            "blue",
+            "red",
+            "green",
+            "gold",
+            "silver",
+            "purple",
+            "pink",
+            "grey",
+            "gray",
+          ];
+          const phoneHasColor = colorKeywords.some((c) =>
+            modelLowerForVariant.includes(c)
+          );
+          const queryHasColor = colorKeywords.some((c) =>
+            queryLowerForVariant.includes(c)
+          );
+
+          if (phoneHasColor && !queryHasColor) {
+            score -= 10;
+          }
+        }
+        // ==================== END VARIANT PENALTY SYSTEM ====================
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = p;
+        }
+
+        // Track scores for debugging (only if score > 0)
+        if (score > 0) {
+          scoredPhones.push({ name: `${p.brand} ${p.name}`, score });
+        }
+      }
+
+      // Log top 5 scoring phones for debugging
+      if (scoredPhones.length > 0) {
+        const topScores = scoredPhones
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5);
+        console.log("🏆 Top 5 matching phones:");
+        topScores.forEach((p, i) => {
+          console.log(`   ${i + 1}. ${p.name} (score: ${p.score})`);
+        });
+      }
+
+      if (bestMatch && bestScore > 0) {
+        console.log(
+          `✅ Matched: ${bestMatch.brand} ${bestMatch.name} (score: ${bestScore})`
+        );
+        foundPhone = bestMatch;
+      }
+
+      if (!foundPhone) {
+        console.log(`❌ No match found. Tried to match: "${cleanQuery}"`);
+        console.log(
+          `Sample phones: ${phones
+            .slice(0, 3)
+            .map((p) => `${p.brand} ${p.name}`)
+            .join(", ")}`
+        );
+      }
+
+      console.log(
+        `🔍 Found phone: ${
+          foundPhone ? foundPhone.brand + " " + foundPhone.name : "NOT FOUND"
+        }`
+      );
+
+      if (foundPhone) {
+        console.log(`✅ Found phone: ${foundPhone.brand} ${foundPhone.name}`);
+
+        // Clean up phone name display (avoid duplicate brand name)
+        const phoneName = foundPhone.name
+          .toLowerCase()
+          .startsWith(foundPhone.brand.toLowerCase())
+          ? foundPhone.name
+          : `${foundPhone.brand} ${foundPhone.name}`;
+
+        // Format comprehensive phone details
+        const detailedResponse = `
+📱 **${phoneName}** - ₹${foundPhone.price.toLocaleString()}
+
+${
+  foundPhone.releaseDate ? `📅 **Release Date:** ${foundPhone.releaseDate}` : ""
+}
+
+---
+
+**💰 Price:** ₹${foundPhone.price.toLocaleString()}
+
+${
+  foundPhone.rating
+    ? `**⭐ Rating:** ${foundPhone.rating}/5${
+        foundPhone.totalRatings ? ` (${foundPhone.totalRatings} ratings)` : ""
+      }`
+    : ""
+}
+
+---
+
+**📱 Display:**
+${foundPhone.specs?.display || "Not specified in database"}
+
+**⚡ Processor:**
+${
+  foundPhone.specs?.processor ||
+  foundPhone.specs?.cpu ||
+  "Not specified in database"
+}
+
+**📷 Rear Camera:**
+${
+  foundPhone.specs?.camera ||
+  foundPhone.specs?.rearCamera ||
+  "Not specified in database"
+}
+
+**🤳 Front Camera:**
+${foundPhone.specs?.frontCamera || "Not specified in database"}
+
+**💾 RAM:**
+${
+  foundPhone.specs?.ram ||
+  foundPhone.specs?.ramAndStorage ||
+  "Not specified in database"
+}
+
+**💿 Storage:**
+${foundPhone.specs?.storage || "Not specified in database"}
+
+**🔋 Battery:**
+${
+  foundPhone.specs?.battery ||
+  foundPhone.specs?.batteryAndCharging ||
+  "Not specified in database"
+}
+
+**🤖 Operating System:**
+${
+  foundPhone.specs?.os ||
+  foundPhone.specs?.operatingSystem ||
+  "Not specified in database"
+}
+
+**🔌 Connectivity:**
+${
+  foundPhone.specs?.connectivity ||
+  foundPhone.specs?.["5G|NFC|Fingerprint"] ||
+  "Not specified in database"
+}
+
+${foundPhone.specs?.build ? `**🏗️ Build:** ${foundPhone.specs.build}` : ""}
+
+${
+  foundPhone.specs?.sensors ? `**🎚️ Sensors:** ${foundPhone.specs.sensors}` : ""
+}
+
+${
+  foundPhone.expertView
+    ? `\n---
+
+**💬 Expert Review:**
+${foundPhone.expertView}`
+    : ""
+}
+
+---
+
+Need more details or want to compare this with another phone? Just ask! 😊
+`.trim();
+
+        return res.json({
+          message: detailedResponse,
+          recommendations: [foundPhone],
+        });
+      } else {
+        console.log("⚠️ Phone not found in database");
+        // Continue with normal AI flow to handle "not found" gracefully
+      }
+    }
+    // ==================== END: SPECIFIC PHONE DETAIL QUERIES ====================
 
     // Declare variables in outer scope so they're accessible in catch block
     let relevantPhones = phones.slice(0, 30);
@@ -469,8 +1144,8 @@ exports.getRecommendation = async (req, res) => {
         /\bs\s*(\d{2,3})\s*(?:ultra|plus|fe)?\b/gi, // Standalone "S24 Ultra", "S23 Plus"
 
         // Samsung foldables (Fold/Flip)
-        /(?:galaxy\s*)?(?:z\s*)?fold\s*\d*\s*(?:\d+)?\s*(?:5g)?/gi, // Fold 6, Z Fold 6, Fold6, Galaxy Z Fold
-        /(?:galaxy\s*)?(?:z\s*)?flip\s*\d*\s*(?:\d+)?\s*(?:5g)?/gi, // Flip 5, Z Flip 5
+        /(?:galaxy\s*)?(?:z\s*)?fold\s*(\d+)?\s*(?:5g)?/gi, // Fold 6, Z Fold 6, Fold6, Galaxy Z Fold
+        /(?:galaxy\s*)?(?:z\s*)?flip\s*(\d+)?\s*(?:5g)?/gi, // Flip 5, Z Flip 5
 
         // Samsung A-series
         /galaxy\s*a\s*(\d+)\s*(?:5g)?/gi, // A35, A55, A16, A15
@@ -541,8 +1216,12 @@ exports.getRecommendation = async (req, res) => {
         modelPatterns.forEach((pattern) => {
           const matches = query.matchAll(pattern);
           for (const match of matches) {
-            const originalMatch = match[0].toLowerCase();
+            const originalMatch = match[0].toLowerCase().trim(); // ADD TRIM HERE
             const modelSearch = originalMatch.replace(/\s+/g, "");
+
+            console.log(
+              `🔍 Searching for pattern "${originalMatch}" in ${phoneList.length} phones`
+            );
 
             const matchingPhones = phoneList.filter((p) => {
               const phoneBrand = p.brand.toLowerCase();
@@ -644,6 +1323,12 @@ exports.getRecommendation = async (req, res) => {
                       phoneName.includes("z " + foldType + " " + foldNumber) ||
                       phoneNameNoSpaces.includes(foldType + foldNumber) ||
                       phoneNameNoSpaces.includes("z" + foldType + foldNumber);
+
+                    if (hasMatchingNumber) {
+                      console.log(
+                        `  ✅ MATCH: "${searchTerm}" matched "${p.name}"`
+                      );
+                    }
                     return hasMatchingNumber;
                   } else {
                     // No number specified, match any fold/flip
@@ -998,7 +1683,7 @@ exports.getRecommendation = async (req, res) => {
 
       const phoneData = relevantPhones.map(formatPhoneForAI);
 
-      const systemPrompt = `You are Phonix 🤖, an expert AI smartphone consultant with deep knowledge of mobile technology, market trends, and user psychology. Your mission is to help EVERY user find their perfect phone, regardless of their tech knowledge, budget, or communication style.
+      const systemPrompt = `You are Specsy 🤖, an expert AI smartphone consultant with deep knowledge of mobile technology, market trends, and user psychology. Your mission is to help EVERY user find their perfect phone, regardless of their tech knowledge, budget, or communication style.
 
 YOUR CORE PERSONALITY:
 - 🎯 Adaptive: Match your communication style to the user (tech-savvy vs beginner, formal vs casual)
@@ -1012,11 +1697,13 @@ YOUR CORE PERSONALITY:
 CRITICAL DATABASE RULES:
 - The phone data below IS YOUR COMPLETE DATABASE - this is your ONLY source of truth
 - If a phone appears in the provided phone data below, it IS IN YOUR DATABASE - state it confidently
-- NEVER claim a phone is "not in database" if you can see it in the provided phone list
-- Phone names have many variations (e.g., "Apple iPhone 13", "iPhone 13 256GB", "iPhone 13 512GB", "Samsung Galaxy S24", "Galaxy S24 5G")
-- Search for: brand name, model number, storage variants, year editions
-- When user asks to compare phones, if you find BOTH phones in the data below, proceed with the comparison immediately
-- Only say "not in database" if the phone is truly absent from ALL the phone data provided below
+- NEVER EVER claim a phone is "not in database" or "not present in my database" if you can see it in the provided phone list
+- Phone names have many variations and storage options (e.g., "Apple iPhone 13", "iPhone 13 256GB", "iPhone 13 512GB", "Samsung Galaxy S24", "Galaxy S24 5G", "Samsung Galaxy Z Fold6", "Samsung Galaxy Z Fold6 5G 512GB")
+- When searching for phones like "Fold6" or "Fold 6", look for: "Galaxy Z Fold6", "Z Fold6", "Fold6", "Galaxy Fold 6", etc.
+- Search flexibly: brand name, model number, storage variants, year editions - match variations
+- When user asks to compare phones (e.g., "compare fold6 vs fold5"), SEARCH THE PHONE LIST BELOW for both phones
+- If you find BOTH phones in the data below (even with slight name variations), proceed with the comparison IMMEDIATELY
+- Only say "not in database" if the phone is truly completely absent from ALL the phone data provided below after thorough searching
 
 ADVANCED USER HANDLING:
 
@@ -1366,23 +2053,52 @@ IMPORTANT RULES:
 `;
 
       // OPTIMIZATION: Create compact phone data (70% smaller)
-      const compactPhoneData = phoneData.map((p) => ({
-        name: `${p.brand} ${p.name}`,
-        price: p.price,
-        rating: p.rating,
-        // Only first part of specs (remove variants/details)
-        display: (p.specs?.display || "N/A").split(",")[0].trim(),
-        cpu: (p.specs?.cpu || "N/A").split(",")[0].trim(),
-        camera: (p.specs?.rearCamera || "N/A").split(",")[0].trim(),
-        battery: (p.specs?.batteryAndCharging || "N/A").split(",")[0].trim(),
-        ram: (p.specs?.ramAndStorage || "N/A").split(",")[0].trim(),
-      }));
+      const compactPhoneData = phoneData.map((p) => {
+        // Clean up duplicate brand names (e.g., "Samsung Samsung Galaxy" -> "Samsung Galaxy")
+        let cleanName = p.name;
+        const brandLower = p.brand.toLowerCase();
+        const nameLower = p.name.toLowerCase();
+        if (nameLower.startsWith(brandLower + " ")) {
+          cleanName = p.name.substring(p.brand.length + 1);
+        }
+
+        return {
+          name: `${p.brand} ${cleanName}`,
+          price: p.price,
+          rating: p.rating,
+          // Only first part of specs (remove variants/details)
+          display: (p.specs?.display || "N/A").split(",")[0].trim(),
+          cpu: (p.specs?.cpu || "N/A").split(",")[0].trim(),
+          camera: (p.specs?.rearCamera || "N/A").split(",")[0].trim(),
+          battery: (p.specs?.batteryAndCharging || "N/A").split(",")[0].trim(),
+          ram: (p.specs?.ramAndStorage || "N/A").split(",")[0].trim(),
+        };
+      });
 
       const phoneDataSection = `
 AVAILABLE PHONES DATABASE (${phoneData.length} phones):
 ${JSON.stringify(compactPhoneData, null, 2)}
 
 Remember: You're not just listing phones - you're a consultant helping users make informed decisions. Understand their needs, provide context, and guide them to the best choice! 🎯`;
+
+      // Log which phones are being sent to AI for debugging
+      console.log(`📱 Sending ${compactPhoneData.length} phones to AI:`);
+      if (compactPhoneData.length <= 10) {
+        compactPhoneData.forEach((p) => console.log(`   - ${p.name}`));
+      } else {
+        console.log(
+          `   - First 5: ${compactPhoneData
+            .slice(0, 5)
+            .map((p) => p.name)
+            .join(", ")}`
+        );
+        console.log(
+          `   - Last 5: ${compactPhoneData
+            .slice(-5)
+            .map((p) => p.name)
+            .join(", ")}`
+        );
+      }
 
       // Build conversation context for Gemini
       let fullPrompt = systemPrompt + "\n\n" + phoneDataSection + "\n\n";
