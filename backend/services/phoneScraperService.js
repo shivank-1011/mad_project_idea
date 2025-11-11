@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 const axios = require("axios");
 const cheerio = require("cheerio");
 const UserAgent = require("user-agents");
-const alternativePhoneScraperService = require("./alternativePhoneScraperService");
+const comprehensivePhoneDataService = require("./comprehensivePhoneDataService");
 
 class PhoneScraperService {
   constructor() {
@@ -13,12 +13,10 @@ class PhoneScraperService {
     this.maxPagesPerSource = 5;
   }
 
-
   async scrapeAllPhones() {
     console.log("🚀 Starting comprehensive phone scraping...");
 
     try {
-
       console.log("� Checking comprehensive phone database...");
       const comprehensivePhones =
         await comprehensivePhoneDataService.generateComprehensivePhoneData();
@@ -29,7 +27,6 @@ class PhoneScraperService {
         );
         return comprehensivePhones;
       }
-
 
       console.log("🔄 Falling back to web scraping...");
       const [flipkartPhones, amazonPhones] = await Promise.allSettled([
@@ -53,7 +50,6 @@ class PhoneScraperService {
         console.error("❌ Amazon scraping failed:", amazonPhones.reason);
       }
 
-
       const uniquePhones = this.removeDuplicates(allPhones);
       console.log(`📱 Total unique phones found: ${uniquePhones.length}`);
 
@@ -63,7 +59,6 @@ class PhoneScraperService {
       throw error;
     }
   }
-
 
   async scrapeFlipkartPhones() {
     console.log("🛒 Scraping phones from Flipkart...");
@@ -86,10 +81,8 @@ class PhoneScraperService {
 
       const page = await browser.newPage();
 
-
       await page.setUserAgent(new UserAgent().toString());
       await page.setViewport({ width: 1920, height: 1080 });
-
 
       const flipkartUrl =
         "https://www.flipkart.com/mobiles/pr?sid=tyy%2C4io&p%5B%5D=facets.brand%255B%255D%3DSamsung&p%5B%5D=facets.brand%255B%255D%3DAPPLE&p%5B%5D=facets.brand%255B%255D%3DNothing&p%5B%5D=facets.brand%255B%255D%3DOnePlus&p%5B%5D=facets.brand%255B%255D%3Dvivo&p%5B%5D=facets.brand%255B%255D%3DXIAOMI&p%5B%5D=facets.brand%255B%255D%3Drealme&p%5B%5D=facets.brand%255B%255D%3DOPPO&otracker=categorytree";
@@ -99,7 +92,6 @@ class PhoneScraperService {
         waitUntil: "networkidle2",
         timeout: 30000,
       });
-
 
       try {
         await page.waitForSelector('button[class*="cancel"]', {
@@ -111,14 +103,11 @@ class PhoneScraperService {
         console.log("ℹ️ No login popup found");
       }
 
-
       for (let pageNum = 1; pageNum <= this.maxPagesPerSource; pageNum++) {
         console.log(`📄 Scraping Flipkart page ${pageNum}...`);
 
         try {
-
           await page.waitForSelector("[data-id]", { timeout: 10000 });
-
 
           const pagePhones = await page.evaluate(() => {
             const phoneElements = document.querySelectorAll("[data-id]");
@@ -144,24 +133,19 @@ class PhoneScraperService {
                   const name = nameElement.textContent.trim();
                   const priceText = priceElement.textContent.trim();
 
-
                   const brand = name.split(" ")[0];
-
 
                   const priceMatch = priceText.match(/₹([\d,]+)/);
                   const price = priceMatch
                     ? parseInt(priceMatch[1].replace(/,/g, ""))
                     : 0;
 
-
                   const ratingText = ratingElement
                     ? ratingElement.textContent.trim()
                     : "4.0";
                   const rating = parseFloat(ratingText) || 4.0;
 
-
                   const imageUrl = imageElement ? imageElement.src : "";
-
 
                   const productLink = linkElement
                     ? "https://www.flipkart.com" +
@@ -169,7 +153,6 @@ class PhoneScraperService {
                     : "";
 
                   if (price > 1000 && name.length > 5) {
-
                     phones.push({
                       name,
                       brand,
@@ -200,7 +183,6 @@ class PhoneScraperService {
           console.log(
             `📱 Found ${pagePhones.length} phones on page ${pageNum}`
           );
-
 
           if (pageNum < this.maxPagesPerSource) {
             const nextButton = await page.$('a[class*="ge2uzL"]:last-child');
@@ -234,7 +216,6 @@ class PhoneScraperService {
     return phones;
   }
 
-
   async scrapeAmazonPhones() {
     console.log("🛒 Scraping phones from Amazon...");
 
@@ -256,10 +237,8 @@ class PhoneScraperService {
 
       const page = await browser.newPage();
 
-
       await page.setUserAgent(new UserAgent().toString());
       await page.setViewport({ width: 1920, height: 1080 });
-
 
       const brands = [
         "Samsung",
@@ -282,12 +261,10 @@ class PhoneScraperService {
             timeout: 30000,
           });
 
-
           await page.waitForSelector(
             '[data-component-type="s-search-result"]',
             { timeout: 10000 }
           );
-
 
           const brandPhones = await page.evaluate((brandName) => {
             const phoneElements = document.querySelectorAll(
@@ -313,7 +290,6 @@ class PhoneScraperService {
                   const name = nameElement.textContent.trim();
                   const priceText = priceElement.textContent.trim();
 
-
                   if (
                     !name.toLowerCase().includes("mobile") &&
                     !name.toLowerCase().includes("phone") &&
@@ -322,15 +298,12 @@ class PhoneScraperService {
                     return;
                   }
 
-
                   const brand = name.split(" ")[0] || brandName;
-
 
                   const priceMatch = priceText.match(/₹([\d,]+)/);
                   const price = priceMatch
                     ? parseInt(priceMatch[1].replace(/,/g, ""))
                     : 0;
-
 
                   const ratingText = ratingElement
                     ? ratingElement.textContent
@@ -338,16 +311,13 @@ class PhoneScraperService {
                   const ratingMatch = ratingText.match(/([\d.]+) out of/);
                   const rating = ratingMatch ? parseFloat(ratingMatch[1]) : 4.0;
 
-
                   const imageUrl = imageElement ? imageElement.src : "";
-
 
                   const productLink = linkElement
                     ? "https://www.amazon.in" + linkElement.getAttribute("href")
                     : "";
 
                   if (price > 1000 && name.length > 5) {
-
                     phones.push({
                       name,
                       brand,
@@ -382,7 +352,6 @@ class PhoneScraperService {
             `📱 Found ${brandPhones.length} ${brand} phones on Amazon`
           );
 
-
           await this.delay(this.requestDelay);
         } catch (error) {
           console.error(
@@ -402,12 +371,10 @@ class PhoneScraperService {
     return phones;
   }
 
-
   extractRAM(name) {
     const ramMatch = name.match(/(\d+)\s*GB\s*RAM|(\d+)GB(?=.*RAM)/i);
     return ramMatch ? `${ramMatch[1] || ramMatch[2]}GB` : "TBD";
   }
-
 
   extractStorage(name) {
     const storageMatch = name.match(/(\d+)\s*GB(?!\s*RAM)|(\d+)TB/i);
@@ -419,13 +386,11 @@ class PhoneScraperService {
     return "TBD";
   }
 
-
   removeDuplicates(phones) {
     const uniquePhones = [];
     const seen = new Set();
 
     phones.forEach((phone) => {
-
       const normalizedName = phone.name
         .toLowerCase()
         .replace(/\s+/g, " ")
@@ -443,11 +408,9 @@ class PhoneScraperService {
     return uniquePhones;
   }
 
-
   async delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-
 
   getCachedData(key) {
     if (this.cache.has(key)) {
@@ -459,7 +422,6 @@ class PhoneScraperService {
     }
     return null;
   }
-
 
   setCachedData(key, data) {
     this.cache.set(key, {
