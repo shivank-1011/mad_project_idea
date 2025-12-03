@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
     "db:seed:real": "node prisma/seed_real_data.js",
+    "db:seed:csv": "node prisma/seed_from_csv.js",
     "db:reset": "prisma migrate reset --force",
     "test:scraper": "node -e \"const scraper = require('./services/alternativePhoneScraperService'); scraper.scrapeAllPhones().then(phones => console.log('Found', phones.length, 'phones')).catch(console.error);\"",
     "test": "echo \"Error: no test specified\" && exit 1"
