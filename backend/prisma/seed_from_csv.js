@@ -40,17 +40,13 @@ async function seedPhones(rawPhones) {
 
     for (const row of rawPhones) {
       try {
-        // Parse Price: "₹129,999" -> 129999.0
         const priceString = row.price ? row.price.replace(/[₹,]/g, "") : "0";
         const price = parseFloat(priceString) || 0;
 
-        // Parse Rating: "4.4" -> 4.4
         const rating = parseFloat(row.avg_rating) || null;
 
-        // Extract Brand: First word of mobile_name
         const brand = row.mobile_name ? row.mobile_name.split(" ")[0] : "Unknown";
 
-        // Construct Specs JSON
         const specs = {
           processor: row.cpu,
           camera: {
@@ -73,13 +69,12 @@ async function seedPhones(rawPhones) {
             rating: rating,
             totalRatings: row.total_ratings,
             releaseDate: row.release_date,
-            imageUrl: "", // Placeholder as discussed
+            imageUrl: "/assets/16pm.png",
             expertView: row.expert_view,
             affiliateLink: null,
           },
         });
 
-        // Add initial price history
         await prisma.priceHistory.create({
           data: {
             productId: createdPhone.id,
@@ -92,7 +87,6 @@ async function seedPhones(rawPhones) {
           console.log(`   💾 Saved ${saved}/${rawPhones.length} phones...`);
         }
       } catch (error) {
-        // console.error(`❌ Error saving phone ${row.mobile_name}:`, error.message);
         failed++;
       }
     }
